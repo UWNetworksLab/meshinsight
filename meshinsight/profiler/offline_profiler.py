@@ -28,7 +28,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-c", "--cpu", action="store_true", help="run offline latency profiling")
-    parser.add_argument("--host", type=str, default="None")
     parser.add_argument("-l", "--latency", action="store_true", help="run offline cpu profiling")
     parser.add_argument("-d", "--duration",  type=int, default=30, help="default duration is 15s")
     return parser.parse_args()
@@ -190,7 +189,7 @@ def linear_regression(label, input_data):
     y = np.array([e[1] for e in input_data])
 
     reg = LinearRegression().fit(X, y)
-    logging.debug(label+ " reg score: %.2f", reg.score(X, y))
+    # logging.debug(label+ " reg score: %.2f", reg.score(X, y))
 
     return reg
 
@@ -364,7 +363,7 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
 
     return breakdown
 
-def parse_cpu_breakdown(breakdown):
+def parse_cpu_breakdown(breakdown, scale):
     result = {}
 
     result['read'] = breakdown['envoy_read']/2 + breakdown['app_read']
@@ -376,7 +375,7 @@ def parse_cpu_breakdown(breakdown):
     result['others'] = breakdown['others']
 
     for k, v in result.items():
-        result[k] = round(v, 4)
+        result[k] = round(v/scale, 6)
 
     return result
 
@@ -432,7 +431,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
         app_xranges = get_target_xrange("echo-server")
         proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
         breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
-        result[request_size] = parse_cpu_breakdown(breakdown)
+        result[request_size] = parse_cpu_breakdown(breakdown, rate/1000)
 
         # Kill the wrk process
         subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
@@ -486,7 +485,7 @@ if __name__ == '__main__':
     # Get Platform info
     platform_config = get_platform_info()
     logging.debug("Platform info: "+str(platform_config))
-    profile = {platform_config: []}
+    profile = {platform_config: {}}
 
     protocols = ["tcp"]
     request_sizes = [100, 1000, 2000, 3000, 4000]
@@ -502,7 +501,7 @@ if __name__ == '__main__':
             
             # Build latency prediction model via linear regression
             latency_models = build_model(latency_profile, request_sizes, p)
-            profile[platform_config].append(latency_models)
+            profile[platform_config]["latency"] = latency_models
         
     if args.cpu:
         for p in protocols: 
@@ -511,7 +510,7 @@ if __name__ == '__main__':
             
             # Build cpu prediction model via linear regression
             cpu_models = build_model(cpu_profile, request_sizes, p)
-            profile[platform_config].append(cpu_models)
+            profile[platform_config]["cpu"] = cpu_models
     
     print(profile)
 

@@ -14,17 +14,42 @@ MeshInsight has an offline profiling phase and an online prediction phase. The o
 profiles of individual service mesh components, and the online phase predicts overhead based on these profiles, service
 mesh configuration, and application workload.
 
-Step 1: Run offline profiler
-```
+## Step 1: Run offline profiler
+```bash
 cd meshinsight/profiler
-sudo python3 offline_profiler.py [-h] [--duration DURATION] [--cpu] [--latency] [--verbose] 
+# Run profiler for latency and cpu overhead profile.
+sudo python3 offline_profiler.py -d 30 --latency --cpu
+
+
+usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose
+  -c, --cpu             run offline latency profiling
+  -l, --latency         run offline cpu profiling
+  -d DURATION, --duration DURATION
+                        default duration is 15s                    
 ```
 
-Step 2: Run online predictor
-```
+## Step 2: Run online predictor
+```bash
 cd meshinsight/predictor
-python3 online_predictor.py [-h] [-v] [-p PROFILE] -c CALL_GRAPH
+# Run prediction based on book info call graph
+python3 online_predictor.py -c ./samples/call_graph/book_info.txt
+
+usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CALL_GRAPH
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose
+  -p PROFILE, --profile PROFILE
+                        path to the profile
+  -c CALL_GRAPH, --call_graph CALL_GRAPH
+                        path to call graph file
 ```
+
+Note: To estimate service mesh overhead, you need to provide an [annotated call graph](./samples/call_graph/call_graph.md).
 
 # Repo Structure
 ```
