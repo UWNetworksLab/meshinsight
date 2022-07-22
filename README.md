@@ -9,7 +9,7 @@ Note: MeshInsight currently only works on Istio. We plan to extend it to other s
 Please find installation instructions for MeshInsight in [INSTALL.md](INSTALL.md).
 
 # Run MeshInsight
-![workflow](./workflow.pdf)
+![workflow](./workflow.png)
 MeshInsight has an offline profiling phase and an online prediction phase. The offline phase generates performance
 profiles of individual service mesh components, and the online phase predicts overhead based on these profiles, service
 mesh configuration, and application workload.
