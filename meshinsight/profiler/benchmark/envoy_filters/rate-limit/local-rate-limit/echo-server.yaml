@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+spec:
+  clusterIP: 10.96.88.88
+  ports:
+  - name: tcp-echo
+    port: 80
+    targetPort: 8080
+  selector:
+    app: echo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        proxy.istio.io/config: |-
+          proxyStatsMatcher:
+            inclusionRegexps:
+            - ".*http_local_rate_limit.*"
+      name: echo
+      labels:
+        app: echo
+    spec:
+      nodeName: h2.mesh.meshbench-pg0.clemson.cloudlab.us
+      containers:
+      - image: jmalloc/echo-server
+      #- image: xzhu0027/echo:in
+        name: echoserver
+  selector:
+    matchLabels:
+      app: echo
+

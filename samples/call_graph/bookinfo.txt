@@ -1,0 +1,8 @@
+(-, Frontend, 100, 1000, TCP)
+(Frontend, Product, 100, 1000, TCP)
+(Product, Reviews, 100, 1000, TCP)
+(Reviews, Ratings, 100, 1000, TCP)
+(Ratings, Reviews, 200, 1000, TCP)
+(Reviews, Product, 400, 1000, TCP)
+(Product, Frontend, 900, 1000, TCP)
+(-, Frontend, 900, 1000, TCP)

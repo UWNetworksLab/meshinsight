@@ -1,0 +1,2 @@
+./wrk/wrk -t1 -c1 -d400s -s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_100.lua http://10.96.88.88:80 --latency
+./wrk2/wrk -t2 -c100 -d45s -s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_100.lua http://10.96.88.88:80 -R 100000

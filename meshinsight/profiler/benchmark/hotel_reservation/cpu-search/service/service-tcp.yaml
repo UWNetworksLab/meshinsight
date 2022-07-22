@@ -1,0 +1,415 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: consul
+  name: consul
+spec:
+  ports:
+    - name: "8300"
+      port: 8300
+      targetPort: 8300
+    - name: "8400"
+      port: 8400
+      targetPort: 8400
+    - name: "8500"
+      port: 8500
+      targetPort: 8500
+    - name: "8600"
+      port: 8600
+      protocol: UDP
+      targetPort: 53
+  selector:
+    io.kompose.service: consul
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: user
+  name: user
+spec:
+  ports:
+    - name: tcp-user
+      port: 8086
+      targetPort: 8086
+  selector:
+    io.kompose.service: user
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  clusterIP: 10.96.7.56
+  ports:
+    - name: http-frontend
+      port: 5000
+      targetPort: 5000
+  selector:
+    io.kompose.service: frontend
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: geo
+  name: geo
+spec:
+  ports:
+    - name: tcp-geo
+      port: 8083
+      targetPort: 8083
+  selector:
+    io.kompose.service: geo
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: jaeger
+  name: jaeger
+spec:
+  ports:
+    - name: "14269"
+      port: 14269
+      targetPort: 14269
+    - name: "5778"
+      port: 5778
+      targetPort: 5778
+    - name: "14268"
+      port: 14268
+      targetPort: 14268
+    - name: "14267"
+      port: 14267
+      targetPort: 14267
+    - name: "16686"
+      port: 16686
+      targetPort: 16686
+    - name: "5775"
+      port: 5775
+      protocol: UDP
+      targetPort: 5775
+    - name: "6831"
+      port: 6831
+      protocol: UDP
+      targetPort: 6831
+    - name: "6832"
+      port: 6832
+      protocol: UDP
+      targetPort: 6832
+  selector:
+    io.kompose.service: jaeger
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: memcached-profile
+  name: memcached-profile
+spec:
+  ports:
+    - name: "memcached-profile"
+      port: 11211
+      targetPort: 11211
+  selector:
+    io.kompose.service: memcached-profile
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: memcached-rate
+  name: memcached-rate
+spec:
+  ports:
+    - name: "memcached-rate"
+      port: 11211
+      targetPort: 11211
+  selector:
+    io.kompose.service: memcached-rate
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: memcached-reserve
+  name: memcached-reserve
+spec:
+  ports:
+    - name: "memcached-reserve"
+      port: 11211
+      targetPort: 11211
+  selector:
+    io.kompose.service: memcached-reserve
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-geo
+  name: mongodb-geo
+spec:
+  ports:
+    - name: mongo-geo
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-geo
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-profile
+  name: mongodb-profile
+spec:
+  ports:
+    - name: tcp-profile
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-profile
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-rate
+  name: mongodb-rate
+spec:
+  ports:
+    - name: tcp-rate
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-rate
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-recommendation
+  name: mongodb-recommendation
+spec:
+  ports:
+    - name: tcp-recommendation
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-recommendation
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-reservation
+  name: mongodb-reservation
+spec:
+  ports:
+    - name: tcp-reservation
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-reservation
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-user
+  name: mongodb-user
+spec:
+  ports:
+    - name: tcp-user
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-user
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: profile
+  name: profile
+spec:
+  ports:
+    - name: tcp-profile
+      port: 8081
+      targetPort: 8081
+  selector:
+    io.kompose.service: profile
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: rate
+  name: rate
+spec:
+  ports:
+    - name: tcp-rate
+      port: 8084
+      targetPort: 8084
+  selector:
+    io.kompose.service: rate
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: recommendation
+  name: recommendation
+spec:
+  ports:
+    - name: tcp-recommendation
+      port: 8085
+      targetPort: 8085
+  selector:
+    io.kompose.service: recommendation
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: reservation
+  name: reservation
+spec:
+  ports:
+    - name: tcp-reservation
+      port: 8087
+      targetPort: 8087
+  selector:
+    io.kompose.service: reservation
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: search
+  name: search
+spec:
+  ports:
+    - name: tcp-search
+      port: 8082
+      targetPort: 8082
+  selector:
+    io.kompose.service: search
+status:
+  loadBalancer: {}
+---

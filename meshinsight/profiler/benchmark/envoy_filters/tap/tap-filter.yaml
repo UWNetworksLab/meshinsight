@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: tap-filter
+spec:
+  workloadSelector: 
+    labels:
+      app: echo
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        portNumber: 8080
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+       name: envoy.filters.http.tap
+       typed_config:
+          "@type": "type.googleapis.com/envoy.extensions.filters.http.tap.v3.Tap"
+          commonConfig:
+            static_config: 
+              match_config: 
+                any_match: true 
+              output_config: 
+                sinks:
+                  - format: JSON_BODY_AS_BYTES
+                    file_per_tap: 
+                      path_prefix: /etc/istio/proxy/tap # need to add usermountpath in frontend deployment?

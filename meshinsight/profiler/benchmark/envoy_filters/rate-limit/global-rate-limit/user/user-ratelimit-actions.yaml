@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: user-ratelimit-actions
+spec:
+  workloadSelector:
+    labels:
+      io.kompose.service: user
+  configPatches:
+    - applyTo: VIRTUAL_HOST
+      match:
+        context: SIDECAR_INBOUND
+        routeConfiguration:
+          vhost:
+            route:
+              action: ANY
+      patch:
+        operation: MERGE
+        # Applies the rate limit rules.
+        value:
+          rate_limits:
+            - actions:
+              - header_value_match:
+                  descriptor_value: no_headermatch
+                  expect_match: false
+                  headers:
+                  - name: "x-headermatch"
+

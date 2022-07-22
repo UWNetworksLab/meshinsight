@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: user-ratelimit-filter
+spec:
+  workloadSelector:
+    labels:
+      io.kompose.service: user
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        portNumber: 8086
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.ratelimit
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+
+          domain: user-ratelimit
+          failure_mode_deny: true
+          rate_limit_service:
+            grpc_service:
+              envoy_grpc:
+                cluster_name: outbound|8081||ratelimit.default.svc.cluster.local
+              timeout: 10s
+            transport_api_version: V3

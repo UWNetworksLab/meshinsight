@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: geo-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: geo-storage
+  hostPath:
+    path: /mnt/volumes/geo-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h2.amd.meshbench-pg0.utah.cloudlab.us
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: profile-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: profile-storage
+  hostPath:
+    path: /mnt/volumes/profile-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h2.amd.meshbench-pg0.utah.cloudlab.us
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rate-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: rate-storage
+  hostPath:
+    path: /mnt/volumes/rate-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h2.amd.meshbench-pg0.utah.cloudlab.us
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: recommendation-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: recommendation-storage
+  hostPath:
+    path: /mnt/volumes/recommendation-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h3.amd.meshbench-pg0.utah.cloudlab.us
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: reservation-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: reservation-storage
+  hostPath:
+    path: /mnt/volumes/reservation-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h2.amd.meshbench-pg0.utah.cloudlab.us
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: user-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: user-storage
+  hostPath:
+    path: /mnt/volumes/user-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - h3.amd.meshbench-pg0.utah.cloudlab.us
+---

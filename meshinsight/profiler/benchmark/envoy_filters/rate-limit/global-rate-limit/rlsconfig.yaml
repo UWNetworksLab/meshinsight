@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: echo-ratelimit-config
+data:
+  config.yaml: |
+    domain: frontend-ratelimit
+    descriptors:
+      - key: header_match
+        value: no_headermatch
+        rate_limit:
+          unit: MINUTE
+          requests_per_unit: 100000
