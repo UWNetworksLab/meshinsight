@@ -473,7 +473,7 @@ if __name__ == '__main__':
     try:
         MESHINSIGHT_DIR = os.environ['MESHINSIGHT_DIR']
     except:
-        raise ValueError('$MESHINSIGHT_DIR is not set. Example: "/home/username/meshinsight/".')
+        raise ValueError('$MESHINSIGHT_DIR env variabe is not set. Example: "/home/username/meshinsight/".')
 
     start = time.time()
     args = parse_args()
@@ -512,6 +512,8 @@ if __name__ == '__main__':
             # Build cpu prediction model via linear regression
             cpu_models = build_model(cpu_profile, request_sizes, p)
             profile[platform_config].append(cpu_models)
+    
+    print(profile)
 
     # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
