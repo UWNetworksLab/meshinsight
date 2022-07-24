@@ -1,7 +1,10 @@
 import logging
 import pickle
 import os
+import re
+import numpy as np
 import argparse
+import subprocess
 
 def parse_args(MESHINSIGHT_DIR):
     parser = argparse.ArgumentParser()
@@ -57,7 +60,9 @@ def predict_latency_overhead(profile, parsed_call_graph):
     for call in parsed_call_graph:
         size = float(call[0])
         protocol = call[2].lower()
+        
         latency_overhead += predict(profile, "latency", size, protocol)
+        print(latency_overhead)
 
     return latency_overhead
 
@@ -68,7 +73,8 @@ def predict_cpu_overhead(profile, parsed_call_graph):
         size = float(call[0])
         rate = float(call[1])/1000.0
         protocol = call[2].lower()
-        latency_overhead += (predict(profile, "cpu", size, protocol)*rate)
+        cpu_overhead += (predict(profile, "cpu", size, protocol)*rate)
+        print(cpu_overhead)
     return cpu_overhead
 
 
@@ -94,6 +100,7 @@ if __name__ == '__main__':
         profile = pickle.load(fin)
 
     platform = get_platform_info()
+    logging.debug("Platform info: "+str(platform))
     if platform not in profile:
         raise Exception("platform's profile not found. Please run offline profiler first\n")    
     profile = profile[platform]

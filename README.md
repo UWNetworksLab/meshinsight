@@ -16,10 +16,8 @@ mesh configuration, and application workload.
 
 ## Step 1: Run offline profiler
 ```bash
-cd meshinsight/profiler
 # Run profiler for latency and cpu overhead profile.
-sudo python3 offline_profiler.py -d 30 --latency --cpu
-
+sudo python3 ./meshinsight/profiler/offline_profiler.py -d 30 --latency --cpu
 
 usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION]
 
@@ -34,9 +32,8 @@ optional arguments:
 
 ## Step 2: Run online predictor
 ```bash
-cd meshinsight/predictor
 # Run prediction based on book info call graph
-python3 online_predictor.py -c ./samples/call_graph/book_info.txt
+python3 ./meshinsight/predictoronline_predictor.py -c ./samples/call_graph/book_info.txt
 
 usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CALL_GRAPH
 
