@@ -46,7 +46,7 @@ optional arguments:
                         path to call graph file
 ```
 
-Note: To estimate service mesh overhead, you need to provide an [annotated call graph](./samples/call_graph/call_graph.md).
+Note: To estimate service mesh overhead, you need to provide an [annotated call graph](./samples/call_graph/CALL_GRAPH.md).
 
 # Repo Structure
 ```

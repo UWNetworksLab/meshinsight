@@ -4,5 +4,7 @@ Application developers can use MeshInsight to estimate service mesh overhead in 
 
 See `book_info.txt` for an example critical path for the [bookinfo](https://istio.io/latest/docs/examples/bookinfo/) application.
 
-We plan to integrate Meshinsight with tracing and critical path analysis tools like [FIRM](https://www.usenix.org/conference/osdi20/presentation/qiu) or [CRISP](https://www.usenix.org/conference/osdi20/presentation/qiu) in the future.
+NOTE:
+1. We plan to integrate Meshinsight with tracing and critical path analysis tools like [FIRM](https://www.usenix.org/conference/osdi20/presentation/qiu) or [CRISP](https://www.usenix.org/conference/osdi20/presentation/qiu) in the future.
+2. MeshInsight currently only support TCP and HTTP proxy profiling. Support for gRPC proxy will be added soon.
 

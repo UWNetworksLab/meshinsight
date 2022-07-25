@@ -19,9 +19,9 @@ logging.getLogger('docker').setLevel(logging.FATAL)
 # (http) envoy_inbound_read, envoy_inbound_userspace, envoy_inbound_write, 
 # envoy_outbound_read, envoy_outbound_userspace, envoy_outbound_write
 size_list = {"tcp":{100:[100, 241], 1000:[983, 1125], 2000:[1884, 2026], 3000:[2934, 3101], \
-    4000:[3834, 4001]}, "http":{100:[100, 100, 252, 387, 387, 508], 1000:[983, 983, 1135, 1271, \
-    1271, 1392], 2000:[1884, 1884, 2036, 2196, 2196, 2311], 3000:[2934, 2934, 3086, 3247, 3247, \
-    3361], 4000:[3834, 3834, 3986, 4147, 4147, 4261]}}
+    4000:[3834, 4001]}, "http":{100:[100, 100, 252, 388, 388, 509], 1000:[983, 983, 1135, 1272, \
+    1272, 1393], 2000:[1884, 1884, 2036, 2197, 2197, 2312], 3000:[2934, 2934, 3086, 3248, 3248, \
+    3362], 4000:[3834, 3834, 3986, 4148, 4148, 4262]}}
 funclatency_path = "./latency/funclatency_filter.py"
 
 def parse_args():
@@ -97,6 +97,7 @@ def run_funclatency(func, duration, pid, size=0, num_calls=0, lower_bound=0):
 
 def run_tcp_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, inbound_size, outbound_size, syscall):
     logging.debug("Running " + str(app) + " latency breakdown...")
+    envoy_path = "/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))
     breakdown = {}
     breakdown['envoy_ipc'] = run_funclatency('process_backlog', duration, envoy_pid, size=1, num_calls=num_calls)
     breakdown['envoy_read_outbound'] = run_funclatency('vfs_readv', duration, envoy_pid, size=outbound_size)
@@ -105,9 +106,25 @@ def run_tcp_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, inbound
     breakdown['envoy_write_inbound'][0] += syscall
     breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
     breakdown['envoy_epoll'] = run_funclatency('ep_send_events_proc', duration, envoy_pid, num_calls=num_calls)
-    breakdown['envoy_userspace'] = run_funclatency("/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))+':*onReadReady*', duration, envoy_pid, num_calls=num_calls) 
-    # breakdown['envoy_userspace'] += run_funclatency(envoy_process['envoy_binary_path']+':*onWriteReady*', duration, envoy_process['envoy_pid'], num_calls=num_calls, funclatency_path="funclatency_filter.py")  - breakdown['write_latency']
+    breakdown['envoy_userspace'] = run_funclatency(envoy_path+':*onReadReady*', duration, envoy_pid, num_calls=num_calls) 
+    return breakdown
 
+def run_http_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_list, syscall):
+    logging.debug("Running " + str(app) + " latency breakdown...")
+    envoy_path = "/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))
+    breakdown = {}
+    breakdown['envoy_ipc'] = run_funclatency('process_backlog', duration, envoy_pid, size=1, num_calls=num_calls)
+    breakdown['envoy_read_outbound'] = run_funclatency('vfs_readv', duration, envoy_pid, size=size_list[3])
+    breakdown['envoy_read_outbound'][0] += syscall
+    breakdown['envoy_write_inbound'] = run_funclatency('vfs_writev', duration, envoy_pid, size=size_list[2])
+    breakdown['envoy_write_inbound'][0] += syscall
+    breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
+    
+    breakdown['envoy_http_inbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[1])
+    breakdown['envoy_http_outbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[4])
+    breakdown['envoy_userspace'] = run_funclatency(envoy_path+':*onReadReady*', duration, envoy_pid, num_calls=num_calls, 
+                            lower_bound=int(max(breakdown['envoy_inbound_http_latency'][1], breakdown['envoy_outbound_http_latency'][1])))
+    breakdown['envoy_epoll'] = run_funclatency('ep_send_events_proc', duration, envoy_pid, num_calls=num_calls) 
     return breakdown
 
 def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_size, syscall):
@@ -166,6 +183,9 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
 
         if protocol == "tcp":
             total_overhead_breakdown['others(proxy)'] = proxy_breakdown["envoy_userspace"][0]*2
+        else:
+            total_overhead_breakdown['parsing(proxy)'] = proxy_breakdown["envoy_http_inbound"][0]+proxy_breakdown["envoy_http_outbound"][0]
+            total_overhead_breakdown['others(proxy)'] = proxy_breakdown["envoy_userspace"][0]*2 - total_overhead_breakdown['parsing(proxy)']
 
         result[request_size] = total_overhead_breakdown
 
@@ -388,7 +408,6 @@ def run_cpu_experiment(protocol, request_sizes, args):
     core_count = multiprocessing.cpu_count()
     logging.debug("Detected %d cores", core_count)
 
-
     # Deploy echo server
     subprocess.run("kubectl label namespace default istio-injection=enabled", shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     logging.debug("Deploying echo server ...")
@@ -487,6 +506,7 @@ if __name__ == '__main__':
     logging.debug("Platform info: "+str(platform_config))
     profile = {platform_config: {}}
 
+    # TODO(xz): Add support for http and grpc proxy
     protocols = ["tcp"]
     request_sizes = [100, 1000, 2000, 3000, 4000]
     if args.latency:
@@ -512,7 +532,6 @@ if __name__ == '__main__':
             cpu_models = build_model(cpu_profile, request_sizes, p)
             profile[platform_config]["cpu"] = cpu_models
     
-    print(profile)
 
     # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
