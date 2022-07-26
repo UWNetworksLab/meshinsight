@@ -503,12 +503,13 @@ if __name__ == '__main__':
 
     if not os.geteuid() == 0:
         raise Exception('This script should be run with "sudo".')
-    
+
     try:
         MESHINSIGHT_DIR = os.environ['MESHINSIGHT_DIR']
-        funclatency_path = os.path.join([MESHINSIGHT_DIR, "meshinsight/profiler/", funclatency_path])
     except:
         raise ValueError('$MESHINSIGHT_DIR env variabe is not set. Example: "/home/username/meshinsight/".')
+
+    os.chdir(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiler"))
 
     start = time.time()
     args = parse_args()
