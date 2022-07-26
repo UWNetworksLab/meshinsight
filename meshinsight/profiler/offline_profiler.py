@@ -22,7 +22,7 @@ size_list = {"tcp":{100:[100, 241], 1000:[983, 1125], 2000:[1884, 2026], 3000:[2
     4000:[3834, 4001]}, "http":{100:[100, 100, 252, 388, 388, 509], 1000:[983, 983, 1135, 1272, \
     1272, 1393], 2000:[1884, 1884, 2036, 2197, 2197, 2312], 3000:[2934, 2934, 3086, 3248, 3248, \
     3362], 4000:[3834, 3834, 3986, 4148, 4148, 4262]}}
-funclatency_path = "./latency/funclatency_filter.py"
+funclatency_path = "latency/funclatency_filter.py"
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -60,12 +60,23 @@ def wait_until_running(pod_name):
         else:
             time.sleep(5)
 
-def get_pid(process_name):
+def get_pid(process_name, allow_empty=False):
     result = subprocess.run(['pidof', process_name], stdout=subprocess.PIPE)
     pid = result.stdout.decode("utf-8")
     if not pid:
-        raise Exception('%s process not found, please make sure auto-injection is enabled.'%process_name)
+        if not allow_empty:
+            raise Exception('%s process not found.'%process_name)
+        else:
+            pid = -1
     return int(pid)
+
+def clean_up():
+    # Clean up kubernetes deployments and wrks
+    subprocess.run(["kubectl", "delete", "all", "--all"], stdout=subprocess.DEVNULL)
+
+    wrk_pid = get_pid("wrk", allow_empty=True)
+    if wrk_pid != -1:
+        subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
 
 def run_funclatency(func, duration, pid, size=0, num_calls=0, lower_bound=0):
 
@@ -120,14 +131,16 @@ def run_http_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_l
     breakdown['envoy_write_inbound'][0] += syscall
     breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
     
-    breakdown['envoy_http_inbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[1])
-    breakdown['envoy_http_outbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[4])
+    breakdown['envoy_parsing_inbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[1])
+    breakdown['envoy_parsing_outbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[4])
     breakdown['envoy_userspace'] = run_funclatency(envoy_path+':*onReadReady*', duration, envoy_pid, num_calls=num_calls, 
-                            lower_bound=int(max(breakdown['envoy_inbound_http_latency'][1], breakdown['envoy_outbound_http_latency'][1])))
+                            lower_bound=int(max(breakdown['envoy_parsing_inbound'][1], breakdown['envoy_parsing_outbound'][1])))
     breakdown['envoy_epoll'] = run_funclatency('ep_send_events_proc', duration, envoy_pid, num_calls=num_calls) 
     return breakdown
 
 def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_size, syscall):
+    inbound_size = min(inbound_size, 4096)
+    outbound_size = min(outbound_size, 4096)
     logging.debug("Running " + str(app) + " latency breakdown...")
     breakdown = {}
     breakdown['app_ipc'] = run_funclatency('process_backlog', duration, app_pid, size=1)
@@ -141,7 +154,7 @@ def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_siz
 def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     # Deploy echo server
     subprocess.run("kubectl label namespace default istio-injection=enabled", shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    logging.debug("Deploying echo server ...")
+    logging.debug("Deploying echo server for %s proxy...", protocol)
     subprocess.run(["kubectl", "apply", "-f", "./benchmark/echo_server/echo-server-"+protocol+"-latency.yaml"], stdout=subprocess.DEVNULL)
     
     # Waited until the echo server is running
@@ -174,6 +187,9 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         if protocol == "tcp":
             proxy_breakdown = run_tcp_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size][0], size_list[protocol][request_size][1], syscall_overhead)
             app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][0], size_list[protocol][request_size][1], syscall_overhead)
+        else:
+            proxy_breakdown = run_http_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
+            app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][2], size_list[protocol][request_size][3], syscall_overhead)
         
         total_overhead_breakdown = {}
         total_overhead_breakdown['read'] = app_breakdown["app_read_inbound"][0]+proxy_breakdown["envoy_read_outbound"][0]
@@ -184,7 +200,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         if protocol == "tcp":
             total_overhead_breakdown['others(proxy)'] = proxy_breakdown["envoy_userspace"][0]*2
         else:
-            total_overhead_breakdown['parsing(proxy)'] = proxy_breakdown["envoy_http_inbound"][0]+proxy_breakdown["envoy_http_outbound"][0]
+            total_overhead_breakdown['parsing(proxy)'] = proxy_breakdown["envoy_parsing_inbound"][0]+proxy_breakdown["envoy_parsing_outbound"][0]
             total_overhead_breakdown['others(proxy)'] = proxy_breakdown["envoy_userspace"][0]*2 - total_overhead_breakdown['parsing(proxy)']
 
         result[request_size] = total_overhead_breakdown
@@ -228,10 +244,13 @@ def build_model(profile, request_sizes, protocol):
     ipc_data = [(i, profile[i]["ipc"]) for i in request_sizes]
     models['ipc_reg']  = linear_regression("ipc", ipc_data)
 
-    if protocol == "tcp":
-        envoy_data = [(i, profile[i]["others(proxy)"]) for i in request_sizes] 
-        models['envoy_reg']  = linear_regression("others(proxy)", envoy_data)
+    envoy_data = [(i, profile[i]["others(proxy)"]) for i in request_sizes] 
+    models['envoy_reg']  = linear_regression("others(proxy)", envoy_data)
 
+    if protocol != "tcp":
+        parsing_data = [(i, profile[i]["parsing(proxy)"]) for i in request_sizes] 
+        models['parsing_reg']  = linear_regression("parsing(proxy)", parsing_data)
+        
     return models
 
 # Get the CPU usage (in  virtual cores) using mpstat
@@ -256,23 +275,19 @@ def generate_flamegraph(option="perf"):
 
     # With BPF profile
     if option == "ebpf":
-        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', '30']
-        # print("Running cmd: " + " ".join(cmd1))
+        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', '45']
         with open("./result/out.profile-folded", "wb") as outfile1:
             subprocess.run(cmd1, stdout=outfile1)
 
         cmd2 = ['./cpu/flamegraph.pl', './result/out.profile-folded']
-        # print("Running cmd: " + " ".join(cmd2))
         with open("./result/profile.svg", "wb") as outfile2:
             subprocess.run(cmd2, stdout=outfile2)
     elif option == "perf":
         # With perf
         cmd1 = ['perf record -F 99 -a -g -- sleep 45']
-        # print("Running cmd: " + " ".join(cmd1))
-        subprocess.run(cmd1, shell=True)
+        subprocess.run(cmd1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         cmd2 = ["perf script | ./cpu/stackcollapse-perf.pl | ./cpu/flamegraph.pl > ./result/profile.svg"]
-        # print("Running cmd: " + " ".join(cmd2))
         subprocess.run(cmd2, shell=True)
 
 # Get the X axis range of TARGET
@@ -352,7 +367,7 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
                                             breakdown['envoy_epoll'])+breakdown['envoy_loopback'] 
     
     if proxy == 'http' or proxy =='grpc':
-        breakdown['envoy_http'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::FilterManagerImpl::onContinueReading (")*0.01
+        breakdown['envoy_parsing'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::FilterManagerImpl::onContinueReading (")*0.01
     
 
 
@@ -376,14 +391,14 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
 
 
     if proxy == 'http' or proxy =='grpc':
-        breakdown['others'] += breakdown['envoy_http']
+        breakdown['others'] += breakdown['envoy_parsing']
     
     for k, v in breakdown.items():
         breakdown[k] = round(v, 4)
 
     return breakdown
 
-def parse_cpu_breakdown(breakdown, scale):
+def parse_cpu_breakdown(breakdown, scale, protocol):
     result = {}
 
     result['read'] = breakdown['envoy_read']/2 + breakdown['app_read']
@@ -391,6 +406,8 @@ def parse_cpu_breakdown(breakdown, scale):
     result['ipc'] = breakdown['envoy_loopback'] + breakdown['app_loopback']
     result['epoll'] = breakdown['envoy_epoll']
     result['app_userspace'] = breakdown['app_userspace']
+    if protocol != "tcp":
+        result["parsing(proxy)"] = breakdown['envoy_parsing']
     result["others(proxy)"] = breakdown['envoy_userspace']
     result['others'] = breakdown['others']
 
@@ -400,7 +417,6 @@ def parse_cpu_breakdown(breakdown, scale):
     return result
 
 def run_cpu_experiment(protocol, request_sizes, args):
-
     # Create directory to store temp files
     Path("./result").mkdir(parents=True, exist_ok=True)
 
@@ -450,7 +466,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
         app_xranges = get_target_xrange("echo-server")
         proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
         breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
-        result[request_size] = parse_cpu_breakdown(breakdown, rate/1000)
+        result[request_size] = parse_cpu_breakdown(breakdown, rate/1000, protocol)
 
         # Kill the wrk process
         subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
@@ -490,6 +506,7 @@ if __name__ == '__main__':
     
     try:
         MESHINSIGHT_DIR = os.environ['MESHINSIGHT_DIR']
+        funclatency_path = os.path.join([MESHINSIGHT_DIR, "meshinsight/profiler/", funclatency_path])
     except:
         raise ValueError('$MESHINSIGHT_DIR env variabe is not set. Example: "/home/username/meshinsight/".')
 
@@ -505,41 +522,40 @@ if __name__ == '__main__':
     platform_config = get_platform_info()
     logging.debug("Platform info: "+str(platform_config))
     profile = {platform_config: {}}
+    clean_up()
 
-    # TODO(xz): Add support for http and grpc proxy
-    protocols = ["tcp"]
+    # TODO(xz): Add support for grpc proxy
+    protocols = ["tcp", "http"]
     request_sizes = [100, 1000, 2000, 3000, 4000]
     if args.latency:
         # Profile syscall overheads
         logging.debug("Profiling system call overhead")
         syscall_overhead  = profile_syscall(args.duration)
         logging.debug("System call overhead is %.4f us", syscall_overhead)
-        
+        profile[platform_config]["latency"] = {}
         for p in protocols:
             # Run profiling
             latency_profile = run_latency_experiment(p, request_sizes, args, syscall_overhead)
             
             # Build latency prediction model via linear regression
             latency_models = build_model(latency_profile, request_sizes, p)
-            profile[platform_config]["latency"] = latency_models
+            profile[platform_config]["latency"][p] = latency_models
         
     if args.cpu:
+        profile[platform_config]["cpu"] = {}
         for p in protocols: 
             cpu_profile = run_cpu_experiment(p, request_sizes, args)
-            cpu_profile = {100: {'read': 0.5376, 'write': 1.2572, 'ipc': 0.8064, 'epoll': 0.4704, 'app_userspace': 5.684, 'others(proxy)': 2.5816, 'others': 42.6216}, 1000: {'read': 0.5236, 'write': 1.2516, 'ipc': 0.8064, 'epoll': 0.4312, 'app_userspace': 5.7904, 'others(proxy)': 2.5536, 'others': 42.5936}, 2000: {'read': 0.9548, 'write': 1.0976, 'ipc': 0.9072, 'epoll': 0.4648, 'app_userspace': 6.4904, 'others(proxy)': 3.4104, 'others': 39.1048}, 3000: {'read': 0.7784, 'write': 0.9772, 'ipc': 0.7896, 'epoll': 0.392, 'app_userspace': 5.8688, 'others(proxy)': 2.9624, 'others': 41.1488}, 4000: {'read': 0.8372, 'write': 1.0612, 'ipc': 0.8344, 'epoll': 0.4312, 'app_userspace': 7.1008, 'others(proxy)': 3.1304, 'others': 39.4072}}
             
             # Build cpu prediction model via linear regression
             cpu_models = build_model(cpu_profile, request_sizes, p)
-            profile[platform_config]["cpu"] = cpu_models
+            profile[platform_config]["cpu"][p] = cpu_models
     
-
     # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
         pickle.dump(profile, fout)
     logging.debug("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
-
+    clean_up()
     end = time.time()
     logging.info("Profile finished, took %.2f seconds", end-start)
-

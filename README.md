@@ -9,7 +9,10 @@ Note: MeshInsight currently only works on Istio. We plan to extend it to other s
 Please find installation instructions for MeshInsight in [INSTALL.md](INSTALL.md).
 
 # Run MeshInsight
-![workflow](./workflow.png)
+|![workflow](./workflow.png)|
+|:--:| 
+| *MeshInsight Workflow* |
+
 MeshInsight has an offline profiling phase and an online prediction phase. The offline phase generates performance
 profiles of individual service mesh components, and the online phase predicts overhead based on these profiles, service
 mesh configuration, and application workload.
@@ -29,7 +32,7 @@ optional arguments:
   -d DURATION, --duration DURATION
                         default duration is 15s                    
 ```
-
+Note: The profiler will delete all kubernetes deployments before it starts to minimize interference.
 ## Step 2: Run online predictor
 ```bash
 # Run prediction based on book info call graph
