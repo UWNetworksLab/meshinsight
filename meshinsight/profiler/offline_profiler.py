@@ -515,9 +515,9 @@ if __name__ == '__main__':
     args = parse_args()
 
     if args.verbose:
-        logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+        logging.basicConfig(format='%(asctime)s | %(levelname)8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
     else:
-        logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+        logging.basicConfig(format='%(asctime)s | %(levelname)8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     # Get Platform info
     platform_config = get_platform_info()
@@ -526,9 +526,11 @@ if __name__ == '__main__':
     clean_up()
 
     # TODO(xz): Add support for grpc proxy
-    protocols = ["tcp", "http"]
-    request_sizes = [100, 1000, 2000, 3000, 4000]
+    protocols = ["http"]
+    request_sizes = [100]
+    
     if args.latency:
+        logging.info("Starting latency profiling!")
         # Profile syscall overheads
         logging.debug("Profiling system call overhead")
         syscall_overhead  = profile_syscall(args.duration)
@@ -541,8 +543,10 @@ if __name__ == '__main__':
             # Build latency prediction model via linear regression
             latency_models = build_model(latency_profile, request_sizes, p)
             profile[platform_config]["latency"][p] = latency_models
-        
+        logging.info("Latency profiling finished!")
+
     if args.cpu:
+        logging.info("Starting CPU profiling!")
         profile[platform_config]["cpu"] = {}
         for p in protocols: 
             cpu_profile = run_cpu_experiment(p, request_sizes, args)
@@ -550,12 +554,13 @@ if __name__ == '__main__':
             # Build cpu prediction model via linear regression
             cpu_models = build_model(cpu_profile, request_sizes, p)
             profile[platform_config]["cpu"][p] = cpu_models
+        logging.info("CPU profiling finished!")
     
     # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
         pickle.dump(profile, fout)
-    logging.debug("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
+    logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
     clean_up()
     end = time.time()
