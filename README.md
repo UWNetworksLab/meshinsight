@@ -36,7 +36,7 @@ Note: The profiler will delete all kubernetes deployments before it starts to mi
 ## Step 2: Run online predictor
 ```bash
 # Run prediction based on book info call graph
-python3 ./meshinsight/predictoronline_predictor.py -c ./samples/call_graph/book_info.txt
+python3 ./meshinsight/predictor/online_predictor.py -c ./samples/call_graph/bookinfo.txt
 
 usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CALL_GRAPH
 
