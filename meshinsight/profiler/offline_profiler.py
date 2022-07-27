@@ -526,8 +526,8 @@ if __name__ == '__main__':
     clean_up()
 
     # TODO(xz): Add support for grpc proxy
-    protocols = ["http"]
-    request_sizes = [100]
+    protocols = ["tcp", "http"]
+    request_sizes = [100, 1000, 2000, 3000, 4000]
     
     if args.latency:
         logging.info("Starting latency profiling!")

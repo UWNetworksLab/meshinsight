@@ -46,13 +46,12 @@ def parse_call_graph(calls):
 def predict(profile, type, size, protocol):
     components = ["read_reg", "write_reg", "epoll_reg", "ipc_reg", "envoy_reg"]
 
-    models = profile[type]
+    models = profile[type][protocol]
     overhead = 0.0
     for component in components:
         overhead += models[component].predict(np.array([[size]]))
 
     return overhead
-
     
 def predict_latency_overhead(profile, parsed_call_graph):
     latency_overhead = 0.0
@@ -60,9 +59,7 @@ def predict_latency_overhead(profile, parsed_call_graph):
     for call in parsed_call_graph:
         size = float(call[0])
         protocol = call[2].lower()
-        
         latency_overhead += predict(profile, "latency", size, protocol)
-        print(latency_overhead)
 
     return latency_overhead
 
@@ -74,7 +71,7 @@ def predict_cpu_overhead(profile, parsed_call_graph):
         rate = float(call[1])/1000.0
         protocol = call[2].lower()
         cpu_overhead += (predict(profile, "cpu", size, protocol)*rate)
-        print(cpu_overhead)
+
     return cpu_overhead
 
 

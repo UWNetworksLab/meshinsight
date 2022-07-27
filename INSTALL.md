@@ -18,7 +18,7 @@ source ~/.bashrc
 pip3 install -r requirements.txt
 ```
 
-# BCC
+# Install BCC
 
 BCC requires Linux 4.1 and above. See https://github.com/iovisor/bcc/blob/master/INSTALL.md for installation instructions.
 ```
@@ -38,11 +38,11 @@ sudo make install
 popd
 ```
 
-# Istio
-Istio release page: https://github.com/istio/istio/releases/
+# Install Istio
+Istio release page: https://github.com/istio/istio/releases/. MeshInsight is tested on v1.13.x and v1.14.x.
 ```
-curl -k -L https://istio.io/downloadIstio | sh -
-# or curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=x.xx.x sh - 
+# Run "curl -k -L https://istio.io/downloadIstio | sh -" to get the latest release.
+curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
 cd istio-{ISTIO_VERSION}
 export PATH=$PWD/bin:$PATH
 istioctl x precheck
@@ -54,7 +54,7 @@ kubectl label namespace default istio-injection=enabled
 kubectl label namespace default istio-injection-
 ```
 
-# wrk and wrk2
+# Install wrk and wrk2
 ```
 sudo apt-get install luarocks -y
 sudo luarocks install luasocket
@@ -71,7 +71,8 @@ make -j $(nproc)
 cd ..
 ```
 
-# Platform Set Up
+# Platform Set Up (Optional)
+In order to obtain stable results, you can disable the following OS feature.
 ```
 # Disable TurboBoost
 cat /sys/devices/system/cpu/intel_pstate/no_turbo
@@ -81,7 +82,7 @@ echo "1" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
-# Disable CPU idle state
+# Disable CPU Idle State
 sudo cpupower frequency-info
 sudo cpupower idle-set -D 0
 ```
