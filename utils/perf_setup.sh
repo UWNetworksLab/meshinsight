@@ -1,5 +1,3 @@
-# Setup script for modified perf verison
-
 VERSION=5.4.156
 wget -O linux.tar.gz wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x//linux-$VERSION.tar.gz
 
@@ -15,10 +13,6 @@ cd linux/linux-$VERSION
 
 #patch -p1 < ../../perf-patch-5.4-conv.patch
 #patch -p1 < ../../binutils.patch
-#git apply ../../perf-patch-5.4-conv.patch --verbose
-#git apply ../../perf-patch-5.4.patch
-#git apply ../../binutils.patch
-
 
 #PYTHON=python3 make -C tools/perf install
 
@@ -29,5 +23,5 @@ cd ../../../../
 
 mkdir -p perf/
 cp -r linux/linux-$VERSION/tools/perf/* perf/
-#rm -r linux/
-#rm -r linux.tar.gz
+rm -r linux/
+rm -r linux.tar.gz
