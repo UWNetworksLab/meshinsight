@@ -12,6 +12,8 @@ from sklearn.linear_model import LinearRegression
 from kubernetes import client, config
 import numpy as np
 
+from config.parser import *
+
 # Disable kubernetes python client logging
 logging.getLogger('kubernetes').setLevel(logging.FATAL)
 logging.getLogger('docker').setLevel(logging.FATAL)
@@ -510,6 +512,10 @@ if __name__ == '__main__':
         raise ValueError('$MESHINSIGHT_DIR env variabe is not set. Example: "/home/username/meshinsight/".')
 
     os.chdir(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiler"))
+
+    # cfg = get_config("config/base.yml")
+    # cfg.merge_from_file("config/istio.yml")
+    # cfg.update_path(MESHINSIGHT_DIR)
 
     start = time.time()
     args = parse_args()

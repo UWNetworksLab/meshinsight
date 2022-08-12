@@ -1,0 +1,74 @@
+# ISTIO 
+SIZE:
+  TCP:
+    R100:
+      - 100
+      - 241 
+    R1000: 
+      - 983
+      - 1125
+    R2000:
+      - 1884
+      - 2026
+    R3000:
+      - 2934
+      - 3101
+    R4000:
+      - 3834
+      - 4001
+  HTTP:
+    R100:
+      - 100
+      - 100
+      - 252
+      - 388
+      - 388
+      - 509 
+    R1000: 
+      - 983
+      - 983
+      - 1135
+      - 1272
+      - 1272 
+      - 1393
+    R2000:
+      - 1884
+      - 1884
+      - 2036
+      - 2197
+      - 2197
+      - 2312
+    R3000:
+      - 2934
+      - 2934
+      - 3086
+      - 3248
+      - 3362 
+    R4000:
+      - 3834 
+      - 3834
+      - 3986
+      - 4148
+      - 4148
+      - 4262
+
+ISTIO:
+  PROXY:
+    TCP: 
+      IPC: process_backlog
+      READ: vfs_readv
+      WRITE: vfs_writev
+      EPOLL: ep_send_events_proc
+      USER: :*onReadReady*    
+    HTTP: 
+      IPC: process_backlog
+      READ: vfs_readv
+      WRITE: vfs_writev
+      EPOLL: ep_send_events_proc
+      USER: :*onReadReady*  
+      PARSE: http_parser_execute
+  APP:
+    READ: vfs_read
+    WRITE: vfs_write
+    IPC: process_backlog
+    

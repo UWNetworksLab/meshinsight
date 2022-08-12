@@ -2,3 +2,5 @@ numpy
 kubernetes
 docker
 sklearn
+easydict
+pyyaml

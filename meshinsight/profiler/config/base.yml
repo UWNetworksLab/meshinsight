@@ -1,0 +1,8 @@
+PATH:
+  FUNCLATENCY_PATH: latency/funclatency.py
+  FUNCLATENCY_FILTER_PATH: latency/funclatency_filter.py
+  SYSCALL_PATH: latency/syscall.c
+  PROFILE_PATH: cpu/profile.py
+  STACKCOLLAPSE_PATH: cpu/stackcollapse-perf.pl
+  FLAMEGRAPH_PATH: cpu/flamegraph.pl
+
