@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -ex
 
 sudo modprobe br_netfilter
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
