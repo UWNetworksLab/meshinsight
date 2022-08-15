@@ -19,6 +19,8 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       name: echo-frontend
       labels:
         app: echo-frontend

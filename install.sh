@@ -1,12 +1,14 @@
 #!/bin/bash
 
+set -ex
+
 # Set up env variable
 echo "export MESHINSIGHT_DIR=$PWD" >> ~/.bashrc
 source ~/.bashrc
 
 # Python Dependencies
+sudo apt install -y python3-pip
 pip3 install -r requirements.txt
-
 
 # Install BCC (Ubuntu 20.04)
 sudo apt update
@@ -34,7 +36,7 @@ istioctl install --set profile=default -y
 # turn on auto-injection
 kubectl label namespace default istio-injection=enabled
 # turn off auto-injection
-kubectl label namespace default istio-injection-
+# kubectl label namespace default istio-injection-
 
 # Install wrk and wrk2
 sudo apt-get install luarocks -y

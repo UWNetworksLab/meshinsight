@@ -31,7 +31,7 @@ echo \
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 
-sudo mkdir /etc/docker
+sudo mkdir -p /etc/docker
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
@@ -90,4 +90,8 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 ### for data plane
 # kubeadm join xxx 
 
+echo "alias k='kubectl'" >> ~/.bashrc
+source ~/.bashrc
 
+kubectl taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
