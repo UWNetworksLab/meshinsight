@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-frontend
+spec:
+  clusterIP: 10.96.77.77
+  ports:
+  - name: tcp-echo-frontend
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: echo-frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-frontend
+spec:
+  replicas: 15
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      name: echo-frontend
+      labels:
+        app: echo-frontend
+    spec:
+      nodeName: h2.meshinsight.meshbench-pg0.clemson.cloudlab.us
+      containers:
+      - image: xzhu0027/echo-frontend-grpc
+        name: echo-frontend-grpc
+  selector:
+    matchLabels:
+      app: echo-frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-server
+spec:
+  clusterIP: 10.96.77.76
+  ports:
+  - name: tcp-echo-server
+    port: 9000
+    targetPort: 9000
+  selector:
+    app: echo-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-server
+spec:
+  replicas: 15
+  template:
+    metadata:
+      name: echo-server
+      labels:
+        app: echo-server
+    spec:
+      nodeName: h2.meshinsight.meshbench-pg0.clemson.cloudlab.us
+      containers:
+      - image: xzhu0027/echo-server-grpc
+        name: echo-server-grpc
+  selector:
+    matchLabels:
+      app: echo-server
