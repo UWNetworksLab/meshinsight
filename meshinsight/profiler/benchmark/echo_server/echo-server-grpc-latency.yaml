@@ -40,7 +40,7 @@ metadata:
 spec:
   clusterIP: 10.96.77.76
   ports:
-  - name: tcp-echo-server
+  - name: grpc-echo-server
     port: 9000
     targetPort: 9000
   selector:
@@ -54,6 +54,8 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
       name: echo-server
       labels:
         app: echo-server

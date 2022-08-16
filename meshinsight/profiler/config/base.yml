@@ -5,4 +5,5 @@ PATH:
   PROFILE_PATH: cpu/profile.py
   STACKCOLLAPSE_PATH: cpu/stackcollapse-perf.pl
   FLAMEGRAPH_PATH: cpu/flamegraph.pl
-
+  WRK_SCRIPT_DIR: 
+  ECHO_DEPLOYMENT_DIR

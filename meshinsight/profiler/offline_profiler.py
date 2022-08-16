@@ -348,7 +348,6 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
     # Get Proxy CPU breakdown
     if proxy != "none":
         # Envoy's read
-        # breakdown['envoy_read'] = virtual_cores*get_target_cpu_percentage(">vfs_readv (", proxy_xranges)*0.01
         breakdown['envoy_read'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::IoSocketHandleImpl::readv", proxy_xranges)*0.01
 
         # Envoy's write
@@ -448,6 +447,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
     result = {}
 
     for request_size in request_sizes:
+        # TODO(xz): train by request size
         logging.debug("Running CPU experiment for %s proxy with request size %d bytes", protocol, request_size)
         result[request_size] = {}
         

@@ -1,4 +1,16 @@
 # ISTIO 
+PROTOCOL:
+  - TCP
+  - HTTP
+  - GRPC
+
+REQUEST_SIZE:
+  - 100
+  - 1000
+  - 2000
+  - 3000
+  - 4000
+
 SIZE:
   TCP:
     R100:
@@ -43,6 +55,7 @@ SIZE:
       - 2934
       - 3086
       - 3248
+      - 3248
       - 3362 
     R4000:
       - 3834 
@@ -51,24 +64,70 @@ SIZE:
       - 4148
       - 4148
       - 4262
+  GRPC: 
+      R100:
+      - 134
+      - 134
+      - 160
+      - 78
+      - 78
+      - 224 
+    R1000: 
+      - 1107
+      - 1107
+      - 1043
+      - 961
+      - 961 
+      - 1107
+    R2000:
+      - 1917
+      - 1917
+      - 1943
+      - 1861
+      - 1861
+      - 2007
+    R3000:
+      - 2967
+      - 2967
+      - 2993
+      - 2911
+      - 2911
+      - 3057 
+    R4000:
+      - 3867 
+      - 3867
+      - 3893
+      - 3811
+      - 3811
+      - 3957
 
 ISTIO:
-  PROXY:
-    TCP: 
+  LATENCY:
+    PROXY:
+      TCP: 
+        IPC: process_backlog
+        READ: vfs_readv
+        WRITE: vfs_writev
+        EPOLL: ep_send_events_proc
+        USER: :*onReadReady*    
+      HTTP: 
+        IPC: process_backlog
+        READ: vfs_readv
+        WRITE: vfs_writev
+        EPOLL: ep_send_events_proc
+        USER: :*onReadReady*  
+        PARSE: :*http_parser_execute*
+      GRPC: 
+        IPC: process_backlog
+        READ: vfs_readv
+        WRITE: vfs_writev
+        EPOLL: ep_send_events_proc
+        USER: :*onReadReady*  
+        PARSE: :*nghttp2_session_mem_recv*
+    APP:
+      READ: vfs_read
+      WRITE: vfs_write
       IPC: process_backlog
-      READ: vfs_readv
-      WRITE: vfs_writev
-      EPOLL: ep_send_events_proc
-      USER: :*onReadReady*    
-    HTTP: 
-      IPC: process_backlog
-      READ: vfs_readv
-      WRITE: vfs_writev
-      EPOLL: ep_send_events_proc
-      USER: :*onReadReady*  
-      PARSE: http_parser_execute
-  APP:
-    READ: vfs_read
-    WRITE: vfs_write
-    IPC: process_backlog
+  CPU:
+
     
