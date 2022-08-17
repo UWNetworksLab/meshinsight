@@ -72,7 +72,7 @@ make -j $(nproc)
 cd $MESHINSIGHT_DIR
 ```
 
-# Platform Set Up (Optional)
+# Benchmarking tips (Optional)
 In order to obtain stable results, you can disable the following OS feature.
 ```
 # Disable TurboBoost

@@ -231,7 +231,7 @@ def linear_regression(label, input_data):
 
     return reg
 
-def build_model(profile, request_sizes, protocol):
+def build_latency_model(profile, request_sizes, protocol):
     models = {}
 
     read_data = [(i, profile[i]["read"]) for i in request_sizes]
@@ -254,6 +254,9 @@ def build_model(profile, request_sizes, protocol):
         models['parsing_reg']  = linear_regression("parsing(proxy)", parsing_data)
         
     return models
+
+def build_cpu_model():
+    return None
 
 # Get the CPU usage (in  virtual cores) using mpstat
 def get_virtual_cores(core_count):
@@ -438,42 +441,44 @@ def run_cpu_experiment(protocol, request_sizes, args):
     time.sleep(15)
 
     # Find maximum rate for the largest request
-    logging.debug("Running wrk2 to get the target service rate ...")
+    logging.debug("Running wrk2 to get the max service rate ...")
     cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 45", "-R 10000000"]
     result = subprocess.run(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").split('\n')
     rate = int(float([r for r in result if "Requests/sec" in r][0].split()[1])*0.9)
-    logging.debug("Done, the target service rate is %d requests/second ...", rate)
+    logging.debug("Done, the max service rate is %d requests/second ...", rate)
+    
+    target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
 
     result = {}
 
     for request_size in request_sizes:
-        # TODO(xz): train by request size
-        logging.debug("Running CPU experiment for %s proxy with request size %d bytes", protocol, request_size)
-        result[request_size] = {}
-        
-        # Run the wrk workload generator
-        cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(rate)]
-        subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
-        logging.debug("Running wrk2 as " + " ".join(cmd))
-        wrk_pid = get_pid("wrk")
+        for target_rate in target_rates:
+            logging.debug("Running CPU experiment for %s proxy with request size %d bytes and request rate %d QPS", protocol, request_size, target_rate)
+            result[request_size] = {}
+            
+            # Run the wrk workload generator
+            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
+            subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+            logging.debug("Running wrk2 as " + " ".join(cmd))
+            wrk_pid = get_pid("wrk")
 
-        # Get CPU usage in terms of virtual cores
-        logging.debug("Running mpstat to get CPU usage...")
-        virtual_cores = get_virtual_cores(core_count)
-        logging.debug("%.2f virtual cores used ...", virtual_cores)
+            # Get CPU usage in terms of virtual cores
+            logging.debug("Running mpstat to get CPU usage...")
+            virtual_cores = get_virtual_cores(core_count)
+            logging.debug("%.2f virtual cores used ...", virtual_cores)
 
-        # Generate FlameGraph and do some preprocessing
-        logging.debug("Running perf to get CPU breakdown...")
-        generate_flamegraph()
-        app_xranges = get_target_xrange("echo-server")
-        proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
-        breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
-        result[request_size] = parse_cpu_breakdown(breakdown, rate/1000, protocol)
+            # Generate FlameGraph and do some preprocessing
+            logging.debug("Running perf to get CPU breakdown...")
+            generate_flamegraph()
+            app_xranges = get_target_xrange("echo-server")
+            proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
+            breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
+            result[(request_size,target_rate)] = parse_cpu_breakdown(breakdown, rate/1000, protocol)
 
-        # Kill the wrk process
-        subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
-        subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
-        time.sleep(20)
+            # Kill the wrk process
+            subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
+            subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
+            time.sleep(20)
 
     # Clean up deployment
     logging.debug("Deleting echo server deployment ...")
@@ -509,13 +514,13 @@ if __name__ == '__main__':
     try:
         MESHINSIGHT_DIR = os.environ['MESHINSIGHT_DIR']
     except:
-        raise ValueError('$MESHINSIGHT_DIR env variabe is not set. Example: "/home/username/meshinsight/".')
+        raise ValueError('$MESHINSIGHT_DIR is not set. Example: "/home/username/meshinsight/".')
 
     os.chdir(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiler"))
     
-    # cfg = get_config("config/base.yml")
-    # cfg.merge_from_file("config/istio.yml")
-    # cfg.update_path(MESHINSIGHT_DIR)
+    cfg = get_config("config/base.yml")
+    cfg.merge_from_file("config/istio.yml")
+    cfg.update_path(MESHINSIGHT_DIR)
 
     start = time.time()
     args = parse_args()
@@ -531,9 +536,8 @@ if __name__ == '__main__':
     profile = {platform_config: {}}
     clean_up()
 
-    # TODO(xz): Add support for grpc proxy
-    protocols = ["tcp", "http"]
-    request_sizes = [100, 1000, 2000, 3000, 4000]
+    protocols = cfg.PROTOCOLS
+    request_sizes = cfg.REQUEST_SIZES
     
     if args.latency:
         logging.info("Starting latency profiling!")
@@ -547,7 +551,7 @@ if __name__ == '__main__':
             latency_profile = run_latency_experiment(p, request_sizes, args, syscall_overhead)
             
             # Build latency prediction model via linear regression
-            latency_models = build_model(latency_profile, request_sizes, p)
+            latency_models = build_latency_model(latency_profile, request_sizes, p)
             profile[platform_config]["latency"][p] = latency_models
         logging.info("Latency profiling finished!")
 
@@ -558,7 +562,7 @@ if __name__ == '__main__':
             cpu_profile = run_cpu_experiment(p, request_sizes, args)
             
             # Build cpu prediction model via linear regression
-            cpu_models = build_model(cpu_profile, request_sizes, p)
+            cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
             profile[platform_config]["cpu"][p] = cpu_models
         logging.info("CPU profiling finished!")
     
