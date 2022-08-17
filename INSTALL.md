@@ -86,4 +86,10 @@ echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_gover
 # Disable CPU Idle State
 sudo cpupower frequency-info
 sudo cpupower idle-set -D 0
+
+# Disable address space randomization 
+echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+
+# Disable hyperthreading (first check slibing list)
+echo 0 | sudo tee /sys/devices/system/cpu/cpuX/online
 ```
