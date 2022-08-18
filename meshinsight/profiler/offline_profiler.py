@@ -13,17 +13,12 @@ from kubernetes import client, config
 import numpy as np
 
 from config.parser import *
+from config.config import *
 
 # Disable kubernetes python client logging
 logging.getLogger('kubernetes').setLevel(logging.FATAL)
 logging.getLogger('docker').setLevel(logging.FATAL)
 
-# (http) envoy_inbound_read, envoy_inbound_userspace, envoy_inbound_write, 
-# envoy_outbound_read, envoy_outbound_userspace, envoy_outbound_write
-size_list = {"tcp":{100:[100, 241], 1000:[983, 1125], 2000:[1884, 2026], 3000:[2934, 3101], \
-    4000:[3834, 4001]}, "http":{100:[100, 100, 252, 388, 388, 509], 1000:[983, 983, 1135, 1272, \
-    1272, 1393], 2000:[1884, 1884, 2036, 2197, 2197, 2312], 3000:[2934, 2934, 3086, 3248, 3248, \
-    3362], 4000:[3834, 3834, 3986, 4148, 4148, 4262]}}
 funclatency_path = "latency/funclatency_filter.py"
 
 def parse_args():
@@ -36,12 +31,14 @@ def parse_args():
 
 def profile_syscall(duration):
     # Run getpid 
-    subprocess.run("gcc ./latency/syscall.c -o ./latency/syscall", shell = True)
-    proc = subprocess.Popen(["./latency/syscall"])
+    syscall_path = cfg.PATH.SYSCALL_PATH
+    syscall_cmd = cfg.PATH.SYSCALL_PATH.replace(".c", "")
+    subprocess.run("gcc "+syscall_path+" -o "+syscall_cmd, shell = True)
+    proc = subprocess.Popen([syscall_cmd])
     pid = proc.pid
 
     # Get getpid latency
-    cmd = ['python3', "./latency/funclatency.py", '-p '+str(pid), "c:getpid", '-d '+str(duration)]
+    cmd = ['python3', cfg.PATH.FUNCLATENCY_PATH, '-p '+str(pid), "c:getpid", '-d '+str(duration)]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
     result = result.stdout.decode("utf-8").split('\n')
     proc.terminate()
@@ -112,14 +109,14 @@ def run_tcp_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, inbound
     logging.debug("Running " + str(app) + " latency breakdown...")
     envoy_path = "/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))
     breakdown = {}
-    breakdown['envoy_ipc'] = run_funclatency('process_backlog', duration, envoy_pid, size=1, num_calls=num_calls)
-    breakdown['envoy_read_outbound'] = run_funclatency('vfs_readv', duration, envoy_pid, size=outbound_size)
+    breakdown['envoy_ipc'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.TCP.IPC, duration, envoy_pid, size=1, num_calls=num_calls)
+    breakdown['envoy_read_outbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.TCP.READ, duration, envoy_pid, size=outbound_size)
     breakdown['envoy_read_outbound'][0] += syscall
-    breakdown['envoy_write_inbound'] = run_funclatency('vfs_writev', duration, envoy_pid, size=inbound_size) 
+    breakdown['envoy_write_inbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.TCP.WRITE, duration, envoy_pid, size=inbound_size) 
     breakdown['envoy_write_inbound'][0] += syscall
     breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
-    breakdown['envoy_epoll'] = run_funclatency('ep_send_events_proc', duration, envoy_pid, num_calls=num_calls)
-    breakdown['envoy_userspace'] = run_funclatency(envoy_path+':*onReadReady*', duration, envoy_pid, num_calls=num_calls) 
+    breakdown['envoy_epoll'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.TCP.EPOLL, duration, envoy_pid, num_calls=num_calls)
+    breakdown['envoy_userspace'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.TCP.USER, duration, envoy_pid, num_calls=num_calls) 
     return breakdown
 
 def run_http_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_list, syscall):
@@ -157,10 +154,11 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     # Deploy echo server
     subprocess.run("kubectl label namespace default istio-injection=enabled", shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     logging.debug("Deploying echo server for %s proxy...", protocol)
-    subprocess.run(["kubectl", "apply", "-f", "./benchmark/echo_server/echo-server-"+protocol+"-latency.yaml"], stdout=subprocess.DEVNULL)
+    subprocess.run(["kubectl", "apply", "-f", "benchmark/echo_server/echo-server-"+protocol+"-latency.yaml"], stdout=subprocess.DEVNULL)
     
     # Waited until the echo server is running
     logging.debug("Waiting all pods to be ready ...")
+    time.sleep(15)
     wait_until_running("echo")
     logging.debug("All echo server pod running...")
 
@@ -172,7 +170,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         result[request_size] = {}
         
         # Run the wrk workload generator
-        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400"]
+        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400"]
         proc = subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         logging.debug("Running wrk as " + " ".join(cmd))
 
@@ -501,7 +499,7 @@ def get_platform_info():
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True).stdout.decode("utf-8"))[1]
 
     # Get Envoy Version 
-    istio_info =  re.split(": |\n", subprocess.run("$HOME/istio-1.14.1/bin/istioctl version", \
+    istio_info =  re.split(": |\n", subprocess.run("istioctl version", \
             shell=True, stdout=subprocess.PIPE, check=True).stdout.decode("utf-8"))[1]
 
     return ("CPU: "+cpu_info, "Kernel: "+kernel_info, "Kubernetes: " + k8s_info, "Istio: v"+istio_info)
@@ -538,7 +536,7 @@ if __name__ == '__main__':
 
     protocols = cfg.PROTOCOLS
     request_sizes = cfg.REQUEST_SIZES
-    
+
     if args.latency:
         logging.info("Starting latency profiling!")
         # Profile syscall overheads
@@ -555,22 +553,22 @@ if __name__ == '__main__':
             profile[platform_config]["latency"][p] = latency_models
         logging.info("Latency profiling finished!")
 
-    if args.cpu:
-        logging.info("Starting CPU profiling!")
-        profile[platform_config]["cpu"] = {}
-        for p in protocols: 
-            cpu_profile = run_cpu_experiment(p, request_sizes, args)
+    # if args.cpu:
+    #     logging.info("Starting CPU profiling!")
+    #     profile[platform_config]["cpu"] = {}
+    #     for p in protocols: 
+    #         cpu_profile = run_cpu_experiment(p, request_sizes, args)
             
-            # Build cpu prediction model via linear regression
-            cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
-            profile[platform_config]["cpu"][p] = cpu_models
-        logging.info("CPU profiling finished!")
+    #         # Build cpu prediction model via linear regression
+    #         cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
+    #         profile[platform_config]["cpu"][p] = cpu_models
+    #     logging.info("CPU profiling finished!")
     
-    # Save profile results
-    Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
-    with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
-        pickle.dump(profile, fout)
-    logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
+    # # Save profile results
+    # Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
+    # with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
+    #     pickle.dump(profile, fout)
+    # logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
     clean_up()
     end = time.time()

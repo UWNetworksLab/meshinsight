@@ -33,8 +33,8 @@ class YamlParser(edict):
             if "PATH" in k:
                 path_dict[k] = os.path.join(path, v)
         self.PATH.update(path_dict)
-        for k, v in self.PATH.items():
-                print(k, v)
+        # for k, v in self.PATH.items():
+        #         print(k, v)
 
 
 def get_config(config_file=None):

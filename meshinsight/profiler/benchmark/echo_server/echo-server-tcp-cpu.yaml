@@ -23,7 +23,7 @@ spec:
       labels:
         app: echo
     spec:
-      nodeName: h1.meshinsight.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h1.meshinsight.meshbench-pg0.clemson.cloudlab.us
       containers:
       - image: jmalloc/echo-server
         name: echoserver

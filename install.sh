@@ -11,6 +11,7 @@ sudo apt install -y python3-pip
 pip3 install -r requirements.txt
 
 # Install BCC (Ubuntu 20.04)
+cd $MESHINSIGHT_DIR
 sudo apt update
 sudo apt install -y bison build-essential cmake flex git libedit-dev   libllvm11 llvm-11-dev libclang-11-dev python zlib1g-dev libelf-dev libfl-dev python3-distutils
 
@@ -26,9 +27,10 @@ sudo make install
 popd
 
 # Install Istio
+cd $MESHINSIGHT_DIR
 curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
 cd istio-1.14.1
-echo  "export PATH=$PWD/bin:$PATH" >> ~/.bashrc
+sudo cp bin/istioctl /usr/local/bin
 source ~/.bashrc
 istioctl x precheck
 istioctl install --set profile=default -y

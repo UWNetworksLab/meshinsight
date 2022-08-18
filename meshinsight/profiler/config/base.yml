@@ -1,9 +1,9 @@
 PATH:
-  FUNCLATENCY_PATH: latency/funclatency.py
-  FUNCLATENCY_FILTER_PATH: latency/funclatency_filter.py
-  SYSCALL_PATH: latency/syscall.c
-  PROFILE_PATH: cpu/profile.py
-  STACKCOLLAPSE_PATH: cpu/stackcollapse-perf.pl
-  FLAMEGRAPH_PATH: cpu/flamegraph.pl
+  FUNCLATENCY_PATH: meshinsight/profiler/latency/funclatency.py
+  FUNCLATENCY_FILTER_PATH: meshinsight/profiler/latency/funclatency_filter.py
+  SYSCALL_PATH: meshinsight/profiler/latency/syscall.c
+  PROFILE_PATH: meshinsight/profiler/cpu/profile.py
+  STACKCOLLAPSE_PATH: meshinsight/profiler/cpu/stackcollapse-perf.pl
+  FLAMEGRAPH_PATH: meshinsight/profiler/cpu/flamegraph.pl
   # WRK_SCRIPT_DIR: 
   # ECHO_DEPLOYMENT_DIR
