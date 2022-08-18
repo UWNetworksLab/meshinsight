@@ -6,6 +6,7 @@ import argparse
 import multiprocessing
 import pickle
 import re
+import sys
 import statistics
 from pathlib import Path
 from sklearn.linear_model import LinearRegression
@@ -18,8 +19,6 @@ from config.config import *
 # Disable kubernetes python client logging
 logging.getLogger('kubernetes').setLevel(logging.FATAL)
 logging.getLogger('docker').setLevel(logging.FATAL)
-
-funclatency_path = "latency/funclatency_filter.py"
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -50,23 +49,37 @@ def wait_until_running(pod_name):
     config.load_kube_config()
 
     v1 = client.CoreV1Api()
-    
+    flag = False
+
+    # Find the status of echo server and wait for it.
     while True:
         ret = v1.list_namespaced_pod(namespace="default")
         status = [i.status.phase == "Running" for i in ret.items if "echo" in i.metadata.name]
         if False not in status:
             return 
         else:
+            flag = True
             time.sleep(5)
 
+    # If we can not find echo server status, the yaml files are probably wrong
+    if not flag:
+        raise Exception("Error: echo server deployment not found. Please check the deployment yaml files.")
+    
 def get_pid(process_name, allow_empty=False):
-    result = subprocess.run(['pidof', process_name], stdout=subprocess.PIPE)
-    pid = result.stdout.decode("utf-8")
-    if not pid:
-        if not allow_empty:
+    if process_name == "envoy":
+        result = subprocess.run("ps -auxfww | grep envoy", shell=True, stdout=subprocess.PIPE)
+        result = result.stdout.decode("utf-8").split("\n")
+        if len(result) < 3:
             raise Exception('%s process not found.'%process_name)
-        else:
-            pid = -1
+        pid = [i for i in result if "--concurrency" in i][0].split()[1]
+    else:
+        result = subprocess.run(['pidof', process_name], stdout=subprocess.PIPE)
+        pid = result.stdout.decode("utf-8")
+        if not pid:
+            if not allow_empty:
+                raise Exception('%s process not found.'%process_name)
+            else:
+                pid = -1
     return int(pid)
 
 def clean_up():
@@ -80,13 +93,13 @@ def clean_up():
 def run_funclatency(func, duration, pid, size=0, num_calls=0, lower_bound=0):
 
     if lower_bound != 0:
-        cmd = ['python3', funclatency_path, '-p '+str(pid), func, '-d '+str(duration), '-w '+str(lower_bound)]
+        cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-w '+str(lower_bound)]
     elif num_calls == 0:
         # run funclatency by return value
-        cmd = ['python3', funclatency_path, '-p '+str(pid), func, '-d '+str(duration), '-t '+str(size)]
+        cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-t '+str(size)]
     else:
         # run funclatency by number of calls when return value is not avaliable
-        cmd = ['python3', funclatency_path, '-p '+str(pid), func, '-d '+str(duration), '-n '+str(num_calls)]
+        cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-n '+str(num_calls)]
 
     logging.debug("Running cmd: " + " ".join(cmd))
     result = subprocess.run(cmd, stdout=subprocess.PIPE)
@@ -158,7 +171,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     
     # Waited until the echo server is running
     logging.debug("Waiting all pods to be ready ...")
-    time.sleep(15)
+    time.sleep(10)
     wait_until_running("echo")
     logging.debug("All echo server pod running...")
 
@@ -553,23 +566,24 @@ if __name__ == '__main__':
             profile[platform_config]["latency"][p] = latency_models
         logging.info("Latency profiling finished!")
 
-    # if args.cpu:
-    #     logging.info("Starting CPU profiling!")
-    #     profile[platform_config]["cpu"] = {}
-    #     for p in protocols: 
-    #         cpu_profile = run_cpu_experiment(p, request_sizes, args)
+    if args.cpu:
+        logging.info("Starting CPU profiling!")
+        profile[platform_config]["cpu"] = {}
+        for p in protocols: 
+            cpu_profile = run_cpu_experiment(p, request_sizes, args)
             
-    #         # Build cpu prediction model via linear regression
-    #         cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
-    #         profile[platform_config]["cpu"][p] = cpu_models
-    #     logging.info("CPU profiling finished!")
+            # Build cpu prediction model via linear regression
+            cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
+            profile[platform_config]["cpu"][p] = cpu_models
+        logging.info("CPU profiling finished!")
     
-    # # Save profile results
-    # Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
-    # with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
-    #     pickle.dump(profile, fout)
-    # logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
+    # Save profile results
+    Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
+    with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
+        pickle.dump(profile, fout)
+    logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
+    print(profile)
     clean_up()
     end = time.time()
     logging.info("Profile finished, took %.2f seconds", end-start)
