@@ -6,6 +6,10 @@ set -ex
 echo "export MESHINSIGHT_DIR=$PWD" >> ~/.bashrc
 source ~/.bashrc
 
+# Install necessary tools
+sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
+sudo apt-get install -y sysstat
+
 # Python Dependencies
 sudo apt install -y python3-pip
 pip3 install -r requirements.txt

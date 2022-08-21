@@ -6,7 +6,15 @@ MeshInsight is a tool to systematically characterize the overhead of service mes
 Note: MeshInsight currently only works on Istio. We plan to extend it to other service meshes (e.g., Cilium or Linkerd) in the future.
 
 # Installation
-Please find installation instructions for MeshInsight in [INSTALL.md](INSTALL.md).
+## Requirements
+- Python (Version >= 3.7)
+- Kubernetes (Idealy version >=1.24)
+
+Run the following script to install necessary tools for MeshInsight:
+```bash
+./install.sh
+```
+For details see [INSTALL.md](INSTALL.md).
 
 # Run MeshInsight
 |![workflow](./workflow.png)|

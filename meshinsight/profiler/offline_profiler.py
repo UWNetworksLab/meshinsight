@@ -66,6 +66,7 @@ def wait_until_running(pod_name):
         raise Exception("Error: echo server deployment not found. Please check the deployment yaml files.")
     
 def get_pid(process_name, allow_empty=False):
+    # Sometimes there are multiple envoy processes 
     if process_name == "envoy":
         result = subprocess.run("ps -auxfww | grep envoy", shell=True, stdout=subprocess.PIPE)
         result = result.stdout.decode("utf-8").split("\n")
@@ -174,8 +175,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     time.sleep(10)
     wait_until_running("echo")
     logging.debug("All echo server pod running...")
-
-    time.sleep(15)
+    time.sleep(10)
     result = {}
 
     for request_size in request_sizes:
@@ -221,7 +221,6 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         # Kill the wrk process
         subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
         time.sleep(15)
-        
 
     # Clean up deployment
     logging.debug("Deleting echo server deployment ...")

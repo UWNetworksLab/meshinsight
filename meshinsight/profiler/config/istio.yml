@@ -1,7 +1,7 @@
 # ISTIO 
 PROTOCOLS:
   - tcp
-  # - http
+  - http
   # - grpc
 
 REQUEST_SIZES:
