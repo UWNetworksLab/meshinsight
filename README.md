@@ -12,7 +12,7 @@ Note: MeshInsight currently only works on Istio. We plan to extend it to other s
 
 Run the following script to install necessary tools for MeshInsight:
 ```bash
-./install.sh
+. ./install.sh
 ```
 For details see [INSTALL.md](INSTALL.md).
 

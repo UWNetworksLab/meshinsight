@@ -72,3 +72,5 @@ echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_gover
 sudo apt-get install -y linux-tools-$(uname -r)
 sudo cpupower frequency-info
 sudo cpupower idle-set -D 0
+
+set +ex
