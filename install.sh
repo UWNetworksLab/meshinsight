@@ -4,7 +4,7 @@ set -ex
 
 # Set up env variable
 echo "export MESHINSIGHT_DIR=$PWD" >> ~/.bashrc
-source ~/.bashrc
+. ~/.bashrc
 
 # Install necessary tools
 sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
@@ -35,7 +35,6 @@ cd $MESHINSIGHT_DIR
 curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
 cd istio-1.14.1
 sudo cp bin/istioctl /usr/local/bin
-source ~/.bashrc
 istioctl x precheck
 istioctl install --set profile=default -y
 

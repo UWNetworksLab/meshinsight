@@ -91,7 +91,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 # kubeadm join xxx 
 
 echo "alias k='kubectl'" >> ~/.bashrc
-source ~/.bashrc
+. ~/.bashrc
 
 kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
