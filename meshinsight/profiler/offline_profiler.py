@@ -137,18 +137,18 @@ def run_http_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_l
     logging.debug("Running " + str(app) + " latency breakdown...")
     envoy_path = "/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))
     breakdown = {}
-    breakdown['envoy_ipc'] = run_funclatency('process_backlog', duration, envoy_pid, size=1, num_calls=num_calls)
-    breakdown['envoy_read_outbound'] = run_funclatency('vfs_readv', duration, envoy_pid, size=size_list[3])
+    breakdown['envoy_ipc'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.HTTP.IPC, duration, envoy_pid, size=1, num_calls=num_calls)
+    breakdown['envoy_read_outbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.HTTP.READ, duration, envoy_pid, size=size_list[3])
     breakdown['envoy_read_outbound'][0] += syscall
-    breakdown['envoy_write_inbound'] = run_funclatency('vfs_writev', duration, envoy_pid, size=size_list[2])
+    breakdown['envoy_write_inbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.HTTP.WRITE, duration, envoy_pid, size=size_list[2])
     breakdown['envoy_write_inbound'][0] += syscall
     breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
     
-    breakdown['envoy_parsing_inbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[1])
-    breakdown['envoy_parsing_outbound'] = run_funclatency(envoy_path+':*http_parser_execute*', duration, envoy_pid, size=size_list[4])
-    breakdown['envoy_userspace'] = run_funclatency(envoy_path+':*onReadReady*', duration, envoy_pid, num_calls=num_calls, 
+    breakdown['envoy_parsing_inbound'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.HTTP.PARSE, duration, envoy_pid, size=size_list[1])
+    breakdown['envoy_parsing_outbound'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.HTTP.PARSE, duration, envoy_pid, size=size_list[4])
+    breakdown['envoy_userspace'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.HTTP.USER, duration, envoy_pid, num_calls=num_calls, 
                             lower_bound=int(max(breakdown['envoy_parsing_inbound'][1], breakdown['envoy_parsing_outbound'][1])))
-    breakdown['envoy_epoll'] = run_funclatency('ep_send_events_proc', duration, envoy_pid, num_calls=num_calls) 
+    breakdown['envoy_epoll'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.HTTP.EPOLL, duration, envoy_pid, num_calls=num_calls) 
     return breakdown
 
 def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_size, syscall):
@@ -156,10 +156,10 @@ def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_siz
     outbound_size = min(outbound_size, 4096)
     logging.debug("Running " + str(app) + " latency breakdown...")
     breakdown = {}
-    breakdown['app_ipc'] = run_funclatency('process_backlog', duration, app_pid, size=1)
-    breakdown['app_read_inbound'] = run_funclatency('vfs_read', duration, app_pid, size=inbound_size)
+    breakdown['app_ipc'] = run_funclatency(cfg.ISTIO.LATENCY.APP.IPC, duration, app_pid, size=1)
+    breakdown['app_read_inbound'] = run_funclatency(cfg.ISTIO.LATENCY.APP.READ, duration, app_pid, size=inbound_size)
     breakdown['app_read_inbound'][0] += syscall
-    breakdown['app_write_outbound'] = run_funclatency('vfs_write', duration, app_pid, size=outbound_size)
+    breakdown['app_write_outbound'] = run_funclatency(cfg.ISTIO.LATENCY.APP.WRITE, duration, app_pid, size=outbound_size)
     breakdown['app_write_outbound'][0] += syscall
     breakdown['app_write_outbound'] = [i-j for i,j in zip(breakdown['app_write_outbound'], breakdown['app_ipc'])]
     return breakdown
@@ -290,7 +290,7 @@ def generate_flamegraph(option="perf"):
 
     # With BPF profile
     if option == "ebpf":
-        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', '45']
+        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', '5']
         with open("./result/out.profile-folded", "wb") as outfile1:
             subprocess.run(cmd1, stdout=outfile1)
 
@@ -299,7 +299,7 @@ def generate_flamegraph(option="perf"):
             subprocess.run(cmd2, stdout=outfile2)
     elif option == "perf":
         # With perf
-        cmd1 = ['perf record -F 99 -a -g -- sleep 45']
+        cmd1 = ['perf record -F 99 -a -g -- sleep 5']
         subprocess.run(cmd1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         cmd2 = ["perf script | ./cpu/stackcollapse-perf.pl | ./cpu/flamegraph.pl > ./result/profile.svg"]
@@ -361,40 +361,40 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
     # Get Proxy CPU breakdown
     if proxy != "none":
         # Envoy's read
-        breakdown['envoy_read'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::IoSocketHandleImpl::readv", proxy_xranges)*0.01
+        breakdown['envoy_read'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.READ+ " (", proxy_xranges)*0.01
 
         # Envoy's write
-        breakdown['envoy_process_backlog'] = virtual_cores*get_target_cpu_percentage(">process_backlog (", proxy_xranges)*0.01
-        breakdown['envoy_write'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::IoSocketHandleImpl::writev (", proxy_xranges)*0.01 -  breakdown['envoy_process_backlog']
-        
+        breakdown['envoy_process_backlog'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.WRITE[0]+ " (", proxy_xranges)*0.01
+        breakdown['envoy_write'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.WRITE[1]+ " (", proxy_xranges)*0.01 -  breakdown['envoy_process_backlog']
+
         # Envoy's loopback
-        breakdown['envoy_br_handle_frame'] = virtual_cores*get_target_cpu_percentage(">br_handle_frame (", proxy_xranges)*0.01
+        breakdown['envoy_br_handle_frame'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.IPC+ " (", proxy_xranges)*0.01
         breakdown['envoy_loopback'] = breakdown['envoy_process_backlog'] - breakdown['envoy_br_handle_frame']
 
         # Envoy' epoll
-        breakdown['envoy_epoll'] = virtual_cores*get_target_cpu_percentage(">do_epoll_wait (", proxy_xranges)*0.01
+        breakdown['envoy_epoll'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.EPOLL+ " (", proxy_xranges)*0.01
 
         # Envoy's userspace
-        breakdown['envoy_userspace'] = virtual_cores*get_target_cpu_percentage(">wrk:worker_0 (")*0.01+\
-                                            virtual_cores*get_target_cpu_percentage(">wrk:worker_1 (")*0.01
+        breakdown['envoy_userspace'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.USER[0]+ " (")*0.01+\
+                                            virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.USER[1]+ " (")*0.01
         breakdown['envoy_userspace'] = breakdown['envoy_userspace']-(breakdown['envoy_read']+breakdown['envoy_write']+
                                             breakdown['envoy_epoll'])+breakdown['envoy_loopback'] 
     
     if proxy == 'http' or proxy =='grpc':
-        breakdown['envoy_parsing'] = virtual_cores*get_target_cpu_percentage(">Envoy::Network::FilterManagerImpl::onContinueReading (")*0.01
+        breakdown['envoy_parsing'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.PARSE+ " (")*0.01
     
 
 
     # Get application CPU breakdown
     if app != "none":
         # App's read
-        breakdown['app_read'] = virtual_cores*get_target_cpu_percentage(">vfs_read (", app_xranges, app_syscall=True)*0.01
+        breakdown['app_read'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.APP.READ+ " (", app_xranges, app_syscall=True)*0.01
 
         # App's loopback
-        breakdown['app_loopback'] = virtual_cores*get_target_cpu_percentage(">process_backlog (", app_xranges)*0.01
+        breakdown['app_loopback'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.APP.IPC+ " (", app_xranges)*0.01
 
         # App's write
-        breakdown['app_write'] = virtual_cores*get_target_cpu_percentage(">vfs_write (", app_xranges, app_syscall=True)*0.01 - breakdown['app_loopback']
+        breakdown['app_write'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.APP.WRITE+ " (", app_xranges, app_syscall=True)*0.01 - breakdown['app_loopback']
 
         # App's userspace
         breakdown['app_userspace'] = virtual_cores*get_target_cpu_percentage(">"+app+" (")*0.01-\
@@ -464,7 +464,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
     for request_size in request_sizes:
         for target_rate in target_rates:
             logging.debug("Running CPU experiment for %s proxy with request size %d bytes and request rate %d QPS", protocol, request_size, target_rate)
-            result[request_size] = {}
+            result[(request_size,target_rate)] = {}
             
             # Run the wrk workload generator
             cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
@@ -487,8 +487,9 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
             # Kill the wrk process
             subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
-            subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
+            # subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
             time.sleep(20)
+            
 
     # Clean up deployment
     logging.debug("Deleting echo server deployment ...")
@@ -572,11 +573,11 @@ if __name__ == '__main__':
             cpu_profile = run_cpu_experiment(p, request_sizes, args)
             
             # Build cpu prediction model via linear regression
-            cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
-            profile[platform_config]["cpu"][p] = cpu_models
+            # cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
+            # profile[platform_config]["cpu"][p] = cpu_models
         logging.info("CPU profiling finished!")
     
-    # Save profile results
+    # # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
         pickle.dump(profile, fout)

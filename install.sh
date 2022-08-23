@@ -58,19 +58,4 @@ cd wrk2
 make -j $(nproc)
 cd $MESHINSIGHT_DIR
 
-# Platform Set Up (Optional)
-
-# Disable TurboBoost
-cat /sys/devices/system/cpu/intel_pstate/no_turbo
-echo "1" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo
-
-# Disable CPU Frequency Scaling 
-cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-# Disable CPU Idle State
-sudo apt-get install -y linux-tools-$(uname -r)
-sudo cpupower frequency-info
-sudo cpupower idle-set -D 0
-
 set +ex

@@ -3,7 +3,7 @@
 ## Requirements
 - Python (version >= 3.7)
 - Kubernetes (Idealy version >=1.24)
-    - We provide instructions to install kubernetes with kubeadm. See [k8s.md](k8s.md) for details.
+    - We provide a script to install kubernetes via kubeadm on Ubuntu. Run `. ./utils/k8s_setup.sh`
 - perf (version 5.4)
 - mpstat
 

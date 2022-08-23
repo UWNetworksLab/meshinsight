@@ -1,7 +1,7 @@
 # ISTIO 
 PROTOCOLS:
   - tcp
-  - http
+  # - http
   # - grpc
 
 REQUEST_SIZES:
@@ -40,38 +40,16 @@ ISTIO:
       IPC: process_backlog
   CPU:
     PROXY:
-      TCP: 
-        IPC: br_handle_frame
-        READ: Envoy::Network::IoSocketHandleImpl::readv
-        WRITE: 
+      IPC: br_handle_frame
+      READ: Envoy::Network::IoSocketHandleImpl::readv
+      WRITE: 
           - process_backlog
           - Envoy::Network::IoSocketHandleImpl::writev
-        EPOLL: do_epoll_wait 
-        USER: 
-          - wrk:worker_0    
-          - wrk:worker_1
-      HTTP: 
-        IPC: br_handle_frame
-        READ: Envoy::Network::IoSocketHandleImpl::readv
-        WRITE: 
-          - process_backlog
-          - Envoy::Network::IoSocketHandleImpl::writev
-        EPOLL: do_epoll_wait 
-        USER: 
-          - wrk:worker_0    
-          - wrk:worker_1
-        PARSE: Envoy::Network::FilterManagerImpl::onContinueReading 
-      GRPC: 
-        IPC: br_handle_frame
-        READ: Envoy::Network::IoSocketHandleImpl::readv
-        WRITE: 
-          - process_backlog
-          - Envoy::Network::IoSocketHandleImpl::writev
-        EPOLL: do_epoll_wait 
-        USER: 
-          - wrk:worker_0    
-          - wrk:worker_1
-        PARSE: Envoy::Network::FilterManagerImpl::onContinueReading 
+      EPOLL: do_epoll_wait 
+      USER: 
+        - wrk:worker_0    
+        - wrk:worker_1
+      PARSE: Envoy::Network::FilterManagerImpl::onContinueReading 
     APP:
       READ: vfs_read
       WRITE: vfs_write
