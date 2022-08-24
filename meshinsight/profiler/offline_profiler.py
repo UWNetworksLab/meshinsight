@@ -269,13 +269,11 @@ def build_cpu_model():
     return None
 
 # Get the CPU usage (in  virtual cores) using mpstat
-def get_virtual_cores(core_count):
+def get_virtual_cores(core_count, duration):
     logging.debug("Running mpstat...")
     cpu_util = []
     for _ in range(5):
-        cmd = ['mpstat', '1', '20']
-        # print("Running cmd: " + " ".join(cmd))
-        # output = {}
+        cmd = ['mpstat', '1', str(duration)]
         result = subprocess.run(cmd, stdout=subprocess.PIPE)
         result_average = result.stdout.decode("utf-8").split('\n')[-2].split()
         overall = 100.00 - float(result_average[-1])
@@ -285,12 +283,12 @@ def get_virtual_cores(core_count):
     return virtual_cores   
 
 # Generate Flamegraph with profile
-def generate_flamegraph(option="perf"):
+def generate_flamegraph(duration, option="perf"):
     logging.debug("Generating Flamegraph...")
 
     # With BPF profile
     if option == "ebpf":
-        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', '5']
+        cmd1 = ['python3', './cpu/profile.py', '-F 99', '-f', duration]
         with open("./result/out.profile-folded", "wb") as outfile1:
             subprocess.run(cmd1, stdout=outfile1)
 
@@ -299,7 +297,7 @@ def generate_flamegraph(option="perf"):
             subprocess.run(cmd2, stdout=outfile2)
     elif option == "perf":
         # With perf
-        cmd1 = ['perf record -F 99 -a -g -- sleep 5']
+        cmd1 = ['perf record -F 99 -a -g -- sleep '+str(duration)]
         subprocess.run(cmd1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         cmd2 = ["perf script | ./cpu/stackcollapse-perf.pl | ./cpu/flamegraph.pl > ./result/profile.svg"]
@@ -458,7 +456,6 @@ def run_cpu_experiment(protocol, request_sizes, args):
     logging.debug("Done, the max service rate is %d requests/second ...", rate)
     
     target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
-
     result = {}
 
     for request_size in request_sizes:
@@ -474,12 +471,12 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
             # Get CPU usage in terms of virtual cores
             logging.debug("Running mpstat to get CPU usage...")
-            virtual_cores = get_virtual_cores(core_count)
+            virtual_cores = get_virtual_cores(core_count, args.duration)
             logging.debug("%.2f virtual cores used ...", virtual_cores)
 
             # Generate FlameGraph and do some preprocessing
             logging.debug("Running perf to get CPU breakdown...")
-            generate_flamegraph()
+            generate_flamegraph(args.duration)
             app_xranges = get_target_xrange("echo-server")
             proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
             breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
@@ -487,7 +484,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
             # Kill the wrk process
             subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
-            # subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
+            subprocess.run(["rm", "./result/profile.svg"], stdout=subprocess.DEVNULL)
             time.sleep(20)
             
 
@@ -577,7 +574,7 @@ if __name__ == '__main__':
             # profile[platform_config]["cpu"][p] = cpu_models
         logging.info("CPU profiling finished!")
     
-    # # Save profile results
+    # Save profile results
     Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
         pickle.dump(profile, fout)

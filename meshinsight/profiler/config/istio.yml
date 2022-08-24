@@ -1,15 +1,15 @@
 # ISTIO 
 PROTOCOLS:
   - tcp
-  # - http
+  - http
   # - grpc
 
 REQUEST_SIZES:
   - 100
-  # - 1000
-  # - 2000
-  # - 3000
-  # - 4000
+  - 1000
+  - 2000
+  - 3000
+  - 4000
 
 ISTIO:
   LATENCY:
