@@ -91,6 +91,8 @@ def clean_up():
     if wrk_pid != -1:
         subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
 
+    time.sleep(20)
+
 def run_funclatency(func, duration, pid, size=0, num_calls=0, lower_bound=0):
 
     if lower_bound != 0:
@@ -151,6 +153,24 @@ def run_http_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_l
     breakdown['envoy_epoll'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.HTTP.EPOLL, duration, envoy_pid, num_calls=num_calls) 
     return breakdown
 
+def run_grpc_proxy_latency_breakdown(app, envoy_pid, duration, num_calls, size_list, syscall):
+    logging.debug("Running " + str(app) + " latency breakdown...")
+    envoy_path = "/proc/PID/root/usr/local/bin/envoy".replace("PID", str(envoy_pid))
+    breakdown = {}
+    breakdown['envoy_ipc'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.GRPC.IPC, duration, envoy_pid, size=1, num_calls=num_calls)
+    breakdown['envoy_read_outbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.GRPC.READ, duration, envoy_pid, size=size_list[3])
+    breakdown['envoy_read_outbound'][0] += syscall
+    breakdown['envoy_write_inbound'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.GRPC.WRITE, duration, envoy_pid, size=size_list[2])
+    breakdown['envoy_write_inbound'][0] += syscall
+    breakdown['envoy_write_inbound'] = [i-j for i,j in zip(breakdown['envoy_write_inbound'], breakdown['envoy_ipc'])]
+    
+    breakdown['envoy_parsing_inbound'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.GRPC.PARSE, duration, envoy_pid, size=size_list[1])
+    breakdown['envoy_parsing_outbound'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.GRPC.PARSE, duration, envoy_pid, size=size_list[4])
+    breakdown['envoy_userspace'] = run_funclatency(envoy_path+cfg.ISTIO.LATENCY.PROXY.GRPC.USER, duration, envoy_pid, num_calls=num_calls, 
+                            lower_bound=int(max(breakdown['envoy_parsing_inbound'][1], breakdown['envoy_parsing_outbound'][1])))
+    breakdown['envoy_epoll'] = run_funclatency(cfg.ISTIO.LATENCY.PROXY.GRPC.EPOLL, duration, envoy_pid, num_calls=num_calls) 
+    return breakdown
+
 def run_app_latency_breakdown(app, app_pid, duration, inbound_size, outbound_size, syscall):
     inbound_size = min(inbound_size, 4096)
     outbound_size = min(outbound_size, 4096)
@@ -200,7 +220,10 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         if protocol == "tcp":
             proxy_breakdown = run_tcp_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size][0], size_list[protocol][request_size][1], syscall_overhead)
             app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][0], size_list[protocol][request_size][1], syscall_overhead)
-        else:
+        elif protocol == "http":
+            proxy_breakdown = run_http_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
+            app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][2], size_list[protocol][request_size][3], syscall_overhead)
+        elif protocol == "grpc":
             proxy_breakdown = run_http_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
             app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][2], size_list[protocol][request_size][3], syscall_overhead)
         
@@ -471,13 +494,12 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
     # Find maximum rate for the largest request
     logging.debug("Running wrk2 to get the max service rate ...")
-    cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 45", "-R 10000000"]
+    cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 45", "-R 10000000"]
     result = subprocess.run(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").split('\n')
     rate = int(float([r for r in result if "Requests/sec" in r][0].split()[1])*0.9)
     logging.debug("Done, the max service rate is %d requests/second ...", rate)
     
-    # target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
-    target_rates = [int(i*rate) for i in [0.25]]
+    target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
     request_sizes_rate_pairs = []
     result = {}
 
@@ -487,7 +509,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
             result[(request_size,target_rate)] = {}
             
             # Run the wrk workload generator
-            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
+            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
             subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
             logging.debug("Running wrk2 as " + " ".join(cmd))
             wrk_pid = get_pid("wrk")
@@ -500,7 +522,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
             # Generate FlameGraph and do some preprocessing
             logging.debug("Running perf to get CPU breakdown...")
             generate_flamegraph(args.duration)
-            app_xranges = get_target_xrange("echo-server")
+            app_xranges = get_target_xrange("echo-server") if protocol != "grpc" else get_target_xrange("server")
             proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
             breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
             result[(request_size,target_rate)] = parse_cpu_breakdown(breakdown, rate/1000, protocol)
@@ -514,9 +536,8 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
     # Clean up deployment
     logging.debug("Deleting echo server deployment ...")
-    subprocess.run(["kubectl", "delete", "deployments", "echo"], stdout=subprocess.DEVNULL)
+    clean_up()
     time.sleep(20)
-    
     return result, request_sizes_rate_pairs
 
 def get_platform_info():
@@ -599,10 +620,10 @@ if __name__ == '__main__':
         logging.info("CPU profiling finished!")
     
     # Save profile results
-    # Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
-    # with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
-    #     pickle.dump(profile, fout)
-    # logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
+    Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
+    with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
+        pickle.dump(profile, fout)
+    logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
     print(profile)
     clean_up()

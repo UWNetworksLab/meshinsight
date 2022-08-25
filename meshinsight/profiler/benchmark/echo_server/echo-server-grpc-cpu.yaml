@@ -6,7 +6,7 @@ spec:
   clusterIP: 10.96.88.88
   ports:
   - name: tcp-echo-frontend
-    port: 8080
+    port: 80
     targetPort: 8080
   selector:
     app: echo-frontend
