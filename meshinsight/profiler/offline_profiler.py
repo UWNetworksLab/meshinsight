@@ -265,8 +265,29 @@ def build_latency_model(profile, request_sizes, protocol):
         
     return models
 
-def build_cpu_model():
-    return None
+def build_cpu_model(profile, request_sizes_rate_pairs, protocol):
+    models = {}
+
+    read_data = [(i[0]*i[1], profile[i]["read"]) for i in request_sizes_rate_pairs]
+    models['read_reg'] = linear_regression("read", read_data)
+
+    write_data =  [(i[0]*i[1], profile[i]["write"]) for i in request_sizes_rate_pairs]
+    models['write_reg']  = linear_regression("write", write_data)
+
+    epoll_data = [(i[0]*i[1], profile[i]["epoll"]) for i in request_sizes_rate_pairs]
+    models['epoll_reg']  = linear_regression("epoll", epoll_data)
+
+    ipc_data = [(i[0]*i[1], profile[i]["ipc"]) for i in request_sizes_rate_pairs]
+    models['ipc_reg']  = linear_regression("ipc", ipc_data)
+
+    envoy_data = [(i[0]*i[1], profile[i]["others(proxy)"]) for i in request_sizes_rate_pairs] 
+    models['envoy_reg']  = linear_regression("others(proxy)", envoy_data)
+
+    if protocol != "tcp":
+        parsing_data = [(i[0]*i[1], profile[i]["parsing(proxy)"]) for i in request_sizes_rate_pairs] 
+        models['parsing_reg']  = linear_regression("parsing(proxy)", parsing_data)
+        
+    return models
 
 # Get the CPU usage (in  virtual cores) using mpstat
 def get_virtual_cores(core_count, duration):
@@ -450,12 +471,14 @@ def run_cpu_experiment(protocol, request_sizes, args):
 
     # Find maximum rate for the largest request
     logging.debug("Running wrk2 to get the max service rate ...")
-    cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 45", "-R 10000000"]
+    cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 45", "-R 10000000"]
     result = subprocess.run(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").split('\n')
     rate = int(float([r for r in result if "Requests/sec" in r][0].split()[1])*0.9)
     logging.debug("Done, the max service rate is %d requests/second ...", rate)
     
-    target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
+    # target_rates = [int(i*rate) for i in [0.25, 0.5, 0.75, 1.00]]
+    target_rates = [int(i*rate) for i in [0.25]]
+    request_sizes_rate_pairs = []
     result = {}
 
     for request_size in request_sizes:
@@ -464,7 +487,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
             result[(request_size,target_rate)] = {}
             
             # Run the wrk workload generator
-            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s ./benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
+            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
             subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
             logging.debug("Running wrk2 as " + " ".join(cmd))
             wrk_pid = get_pid("wrk")
@@ -481,6 +504,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
             proxy_xranges = (get_target_xrange("wrk:worker_0")[0], get_target_xrange("wrk:worker_1")[1]) # wrk1 and wrk2 are always next to each other
             breakdown = get_cpu_breakdown(core_count, protocol, proxy_xranges, "echo-server", app_xranges)
             result[(request_size,target_rate)] = parse_cpu_breakdown(breakdown, rate/1000, protocol)
+            request_sizes_rate_pairs.append((request_size,target_rate))
 
             # Kill the wrk process
             subprocess.run(["kill", "-9", str(wrk_pid)], stdout=subprocess.DEVNULL)
@@ -493,7 +517,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
     subprocess.run(["kubectl", "delete", "deployments", "echo"], stdout=subprocess.DEVNULL)
     time.sleep(20)
     
-    return result
+    return result, request_sizes_rate_pairs
 
 def get_platform_info():
     # Get CPU Info
@@ -567,18 +591,18 @@ if __name__ == '__main__':
         logging.info("Starting CPU profiling!")
         profile[platform_config]["cpu"] = {}
         for p in protocols: 
-            cpu_profile = run_cpu_experiment(p, request_sizes, args)
+            cpu_profile, request_sizes_rate_pairs = run_cpu_experiment(p, request_sizes, args)
             
             # Build cpu prediction model via linear regression
-            # cpu_models = build_cpu_model(cpu_profile, request_sizes, p)
-            # profile[platform_config]["cpu"][p] = cpu_models
+            cpu_models = build_cpu_model(cpu_profile, request_sizes_rate_pairs, p)
+            profile[platform_config]["cpu"][p] = cpu_models
         logging.info("CPU profiling finished!")
     
     # Save profile results
-    Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
-    with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
-        pickle.dump(profile, fout)
-    logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
+    # Path(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles")).mkdir(parents=True, exist_ok=True)
+    # with open(os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"), "wb") as fout:
+    #     pickle.dump(profile, fout)
+    # logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
     print(profile)
     clean_up()

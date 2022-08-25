@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: echo-frontend
 spec:
-  clusterIP: 10.96.77.77
+  clusterIP: 10.96.88.88
   ports:
   - name: tcp-echo-frontend
     port: 8080
@@ -25,7 +25,6 @@ spec:
       labels:
         app: echo-frontend
     spec:
-      # nodeName: h2.meshinsight.meshbench-pg0.clemson.cloudlab.us
       containers:
       - image: xzhu0027/echo-frontend-grpc
         name: echo-frontend-grpc
@@ -60,7 +59,6 @@ spec:
       labels:
         app: echo-server
     spec:
-      # nodeName: h2.meshinsight.meshbench-pg0.clemson.cloudlab.us
       containers:
       - image: xzhu0027/echo-server-grpc
         name: echo-server-grpc

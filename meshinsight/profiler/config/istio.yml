@@ -1,15 +1,20 @@
 # ISTIO 
 PROTOCOLS:
-  - tcp
-  - http
-  # - grpc
+  # - tcp
+  # - http
+  - grpc
 
 REQUEST_SIZES:
   - 100
-  - 1000
-  - 2000
-  - 3000
-  - 4000
+  # - 1000
+  # - 2000
+  # - 3000
+  # - 4000
+
+WRK_SCRIPT:
+  TCP_PATH: benchmark/wrk_scripts/echo_workload/echo_workload_size.lua
+  HTTP_PATH: benchmark/wrk_scripts/echo_workload/echo_workload_size.lua
+  GRPC_PATH: benchmark/wrk_scripts/echo_workload_grpc/echo_workload_size.lua
 
 ISTIO:
   LATENCY:
@@ -54,4 +59,4 @@ ISTIO:
       READ: vfs_read
       WRITE: vfs_write
       IPC: process_backlog
-    
+
