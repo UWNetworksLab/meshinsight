@@ -203,14 +203,14 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         result[request_size] = {}
         
         # Run the wrk workload generator
-        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s benchmark/wrk_scripts/echo_workload/request_b/echo_workload_size.lua".replace("size", str(request_size)), "http://10.96.88.88:80", "-d 400"]
+        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 400"]
         proc = subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         logging.debug("Running wrk as " + " ".join(cmd))
 
         # Get Application and Envoy process info
         wrk_pid = get_pid("wrk")
         envoy_pid = get_pid("envoy")
-        echo_pid = get_pid("echo-server")
+        echo_pid = get_pid("echo-server") if protocol != "grpc" else get_pid("server")
         logging.debug("wrk pid: %d", wrk_pid)
         logging.debug("Applcation pid: %d", echo_pid)
         logging.debug("Envoy proxy pid: %d", envoy_pid)
@@ -249,7 +249,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     logging.debug("Deleting echo server deployment ...")
     subprocess.run(["kubectl", "delete", "deployments", "echo"], stdout=subprocess.DEVNULL)
     time.sleep(15)
-
+    print(result)
     return result
 
 def linear_regression(label, input_data):
@@ -425,8 +425,6 @@ def get_cpu_breakdown(virtual_cores, proxy, proxy_xranges, app, app_xranges):
     if proxy == 'http' or proxy =='grpc':
         breakdown['envoy_parsing'] = virtual_cores*get_target_cpu_percentage(">" + cfg.ISTIO.CPU.PROXY.PARSE+ " (")*0.01
     
-
-
     # Get application CPU breakdown
     if app != "none":
         # App's read
