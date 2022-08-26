@@ -203,7 +203,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
         result[request_size] = {}
         
         # Run the wrk workload generator
-        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 400"]
+        cmd = ["./wrk/wrk", "-t 1", "-c 1", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_size)), "http://10.96.88.88:80", "-d 800"]
         proc = subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         logging.debug("Running wrk as " + " ".join(cmd))
 
@@ -224,7 +224,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
             proxy_breakdown = run_http_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
             app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][2], size_list[protocol][request_size][3], syscall_overhead)
         elif protocol == "grpc":
-            proxy_breakdown = run_http_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
+            proxy_breakdown = run_grpc_proxy_latency_breakdown("echo server", envoy_pid, args.duration, 0, size_list[protocol][request_size], syscall_overhead)
             app_breakdown = run_app_latency_breakdown("echo server", echo_pid, args.duration, size_list[protocol][request_size][2], size_list[protocol][request_size][3], syscall_overhead)
         
         total_overhead_breakdown = {}
@@ -249,7 +249,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
     logging.debug("Deleting echo server deployment ...")
     subprocess.run(["kubectl", "delete", "deployments", "echo"], stdout=subprocess.DEVNULL)
     time.sleep(15)
-    print(result)
+    
     return result
 
 def linear_regression(label, input_data):
@@ -507,7 +507,7 @@ def run_cpu_experiment(protocol, request_sizes, args):
             result[(request_size,target_rate)] = {}
             
             # Run the wrk workload generator
-            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_sizes[-1])), "http://10.96.88.88:80", "-d 400", "-R "+str(target_rate)]
+            cmd = ["./wrk2/wrk", "-t 2", "-c 100", "-s benchmark/wrk_scripts/echo_workload/echo_workload_PROTOCOL_SIZE.lua".replace("PROTOCOL", protocol).replace("SIZE", str(request_size)), "http://10.96.88.88:80", "-d 800", "-R "+str(target_rate)]
             subprocess.Popen(" ".join(cmd), shell=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
             logging.debug("Running wrk2 as " + " ".join(cmd))
             wrk_pid = get_pid("wrk")
