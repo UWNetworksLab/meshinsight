@@ -1,0 +1,5 @@
+[playlists-api] playlists-api: GET /;[playlists-api] playlists-api: redis-get 6504
+[playlists-api] playlists-api: GET / 9344
+[playlists-api] playlists-api: GET /;[playlists-api] playlists-api: videos-api GET /id;[videos-api] videos-api: GET /id;[videos-api] videos-api: redis-get 13268
+[playlists-api] playlists-api: GET /;[playlists-api] playlists-api: videos-api GET /id;[videos-api] videos-api: GET /id 2152
+[playlists-api] playlists-api: GET /;[playlists-api] playlists-api: videos-api GET /id 23220

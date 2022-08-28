@@ -1,0 +1,845 @@
+{
+    "data": [
+        {
+            "traceID": "440d25a6e4d88ee7",
+            "spans": [
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "365564c30adf6c7f",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042437689,
+                    "duration": 572,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "27093fa65844a5f1",
+                    "flags": 1,
+                    "operationName": "playlists-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042428801,
+                    "duration": 1626,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "7cf00dd03d069f8a",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042431462,
+                    "duration": 4147,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "07f23b82e4f89874",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042435663,
+                    "duration": 768,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "18cd30f489e2eab1",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042436465,
+                    "duration": 1073,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "054bca773e1a8274",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042439666,
+                    "duration": 553,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "0f3baefe01fee6ea",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042438288,
+                    "duration": 777,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "7e6c0103927a3591",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042439175,
+                    "duration": 429,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "4f81efae905471bf",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042441230,
+                    "duration": 618,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "027341460fbe3256",
+                    "flags": 1,
+                    "operationName": "playlists-api: videos-api GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "440d25a6e4d88ee7"
+                        }
+                    ],
+                    "startTime": 1661664042440338,
+                    "duration": 723,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "440d25a6e4d88ee7",
+                    "flags": 1,
+                    "operationName": "playlists-api: GET /",
+                    "references": [],
+                    "startTime": 1661664042428357,
+                    "duration": 13622,
+                    "tags": [
+                        {
+                            "key": "sampler.type",
+                            "type": "string",
+                            "value": "const"
+                        },
+                        {
+                            "key": "sampler.param",
+                            "type": "bool",
+                            "value": true
+                        },
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "714547b8d67e4035",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "306f0b1c7db682bc"
+                        }
+                    ],
+                    "startTime": 1661664042433680,
+                    "duration": 1202,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "306f0b1c7db682bc",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "7cf00dd03d069f8a"
+                        }
+                    ],
+                    "startTime": 1661664042433654,
+                    "duration": 1327,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "5daf05601d9389b6",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "118860be6fc3d2de"
+                        }
+                    ],
+                    "startTime": 1661664042435830,
+                    "duration": 389,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "118860be6fc3d2de",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "07f23b82e4f89874"
+                        }
+                    ],
+                    "startTime": 1661664042435810,
+                    "duration": 450,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "3b618d082567462b",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "225f02a3f4ed361b"
+                        }
+                    ],
+                    "startTime": 1661664042436788,
+                    "duration": 560,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "225f02a3f4ed361b",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "18cd30f489e2eab1"
+                        }
+                    ],
+                    "startTime": 1661664042436784,
+                    "duration": 621,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "5d02526f9803044f",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "1598033657ce5294"
+                        }
+                    ],
+                    "startTime": 1661664042437939,
+                    "duration": 135,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "21cd25e3767d1ee7",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "054bca773e1a8274"
+                        }
+                    ],
+                    "startTime": 1661664042439854,
+                    "duration": 91,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "39bc9e403f569e03",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "036cd04df401d08f"
+                        }
+                    ],
+                    "startTime": 1661664042440574,
+                    "duration": 342,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "036cd04df401d08f",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "027341460fbe3256"
+                        }
+                    ],
+                    "startTime": 1661664042440572,
+                    "duration": 369,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "02cdf8a5a70733bd",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "102d18d64bed3cae"
+                        }
+                    ],
+                    "startTime": 1661664042441469,
+                    "duration": 196,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "102d18d64bed3cae",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "4f81efae905471bf"
+                        }
+                    ],
+                    "startTime": 1661664042441465,
+                    "duration": 226,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "34d5086de99eed70",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "21cd25e3767d1ee7"
+                        }
+                    ],
+                    "startTime": 1661664042439856,
+                    "duration": 68,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "1598033657ce5294",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "365564c30adf6c7f"
+                        }
+                    ],
+                    "startTime": 1661664042437934,
+                    "duration": 267,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "2922f7e1d4810c91",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "7263ad0c87320aeb"
+                        }
+                    ],
+                    "startTime": 1661664042438762,
+                    "duration": 191,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "7263ad0c87320aeb",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "0f3baefe01fee6ea"
+                        }
+                    ],
+                    "startTime": 1661664042438759,
+                    "duration": 234,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "51668fa204b68c15",
+                    "flags": 1,
+                    "operationName": "videos-api: redis-get",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "27282aca3618bfc3"
+                        }
+                    ],
+                    "startTime": 1661664042439254,
+                    "duration": 234,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "440d25a6e4d88ee7",
+                    "spanID": "27282aca3618bfc3",
+                    "flags": 1,
+                    "operationName": "videos-api: GET /id",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "440d25a6e4d88ee7",
+                            "spanID": "7e6c0103927a3591"
+                        }
+                    ],
+                    "startTime": 1661664042439252,
+                    "duration": 270,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                }
+            ],
+            "processes": {
+                "p1": {
+                    "serviceName": "playlists-api",
+                    "tags": [
+                        {
+                            "key": "client-uuid",
+                            "type": "string",
+                            "value": "1071c951e6609f8d"
+                        },
+                        {
+                            "key": "hostname",
+                            "type": "string",
+                            "value": "aa1ac5d69078"
+                        },
+                        {
+                            "key": "ip",
+                            "type": "string",
+                            "value": "172.18.0.2"
+                        },
+                        {
+                            "key": "jaeger.version",
+                            "type": "string",
+                            "value": "Go-2.25.0"
+                        }
+                    ]
+                },
+                "p2": {
+                    "serviceName": "videos-api",
+                    "tags": [
+                        {
+                            "key": "client-uuid",
+                            "type": "string",
+                            "value": "513809c4cc527b70"
+                        },
+                        {
+                            "key": "hostname",
+                            "type": "string",
+                            "value": "80e4e934cd50"
+                        },
+                        {
+                            "key": "ip",
+                            "type": "string",
+                            "value": "172.18.0.7"
+                        },
+                        {
+                            "key": "jaeger.version",
+                            "type": "string",
+                            "value": "Go-2.25.0"
+                        }
+                    ]
+                }
+            },
+            "warnings": null
+        }
+    ],
+    "total": 0,
+    "limit": 0,
+    "offset": 0,
+    "errors": null
+}
