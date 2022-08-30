@@ -1,0 +1,155 @@
+{
+    "data": [
+        {
+            "traceID": "0ed209594333dce5",
+            "spans": [
+                {
+                    "traceID": "0ed209594333dce5",
+                    "spanID": "093ad0a714b5a849",
+                    "flags": 1,
+                    "operationName": "ping-receive",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "0ed209594333dce5",
+                            "spanID": "4295c90a19b4214a"
+                        }
+                    ],
+                    "startTime": 1661840054261104,
+                    "duration": 1125,
+                    "tags": [
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "0ed209594333dce5",
+                    "spanID": "0ed209594333dce5",
+                    "flags": 1,
+                    "operationName": "ping-receive",
+                    "references": [],
+                    "startTime": 1661840054230139,
+                    "duration": 45696,
+                    "tags": [
+                        {
+                            "key": "sampler.type",
+                            "type": "string",
+                            "value": "const"
+                        },
+                        {
+                            "key": "sampler.param",
+                            "type": "bool",
+                            "value": true
+                        },
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "server"
+                        },
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                },
+                {
+                    "traceID": "0ed209594333dce5",
+                    "spanID": "4295c90a19b4214a",
+                    "flags": 1,
+                    "operationName": "ping-send",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "0ed209594333dce5",
+                            "spanID": "0ed209594333dce5"
+                        }
+                    ],
+                    "startTime": 1661840054232019,
+                    "duration": 41693,
+                    "tags": [
+                        {
+                            "key": "internal.span.format",
+                            "type": "string",
+                            "value": "proto"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p2",
+                    "warnings": null
+                }
+            ],
+            "processes": {
+                "p1": {
+                    "serviceName": "service-b",
+                    "tags": [
+                        {
+                            "key": "client-uuid",
+                            "type": "string",
+                            "value": "23727824e4588bae"
+                        },
+                        {
+                            "key": "hostname",
+                            "type": "string",
+                            "value": "08076b8bc5aa"
+                        },
+                        {
+                            "key": "ip",
+                            "type": "string",
+                            "value": "172.19.0.2"
+                        },
+                        {
+                            "key": "jaeger.version",
+                            "type": "string",
+                            "value": "Go-2.25.0"
+                        }
+                    ]
+                },
+                "p2": {
+                    "serviceName": "service-a",
+                    "tags": [
+                        {
+                            "key": "client-uuid",
+                            "type": "string",
+                            "value": "290329dbb88012fc"
+                        },
+                        {
+                            "key": "hostname",
+                            "type": "string",
+                            "value": "4d40485fbb23"
+                        },
+                        {
+                            "key": "ip",
+                            "type": "string",
+                            "value": "172.19.0.3"
+                        },
+                        {
+                            "key": "jaeger.version",
+                            "type": "string",
+                            "value": "Go-2.25.0"
+                        }
+                    ]
+                }
+            },
+            "warnings": null
+        }
+    ],
+    "total": 0,
+    "limit": 0,
+    "offset": 0,
+    "errors": null
+}

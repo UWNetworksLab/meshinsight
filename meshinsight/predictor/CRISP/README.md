@@ -33,12 +33,27 @@ optional arguments:
                         number of operations to show in the heatmap
 ```
 
-## Example
-To demonstrate the usage of CRISP, I've exported a trace from a [sample application](https://github.com/marcel-dempers/docker-development-youtube-series/tree/master/tracing). See `example/criticalPaths.html` for output summary and flame graphs for critical paths.
+## Example 1 
+To demonstrate the usage of CRISP, I've exported a trace from a simple two service [application](https://github.com/albertteoh/jaeger-go-example). See `example1/criticalPaths.html` for output summary and flame graphs for critical paths.
 
 #### Application architecture
 ```
++------------+     +---------------+   
+| service a  +---->+   service b   | 
++------------+     +-----+---------+   
 
+```
+
+#### Command
+```bash
+python3 process.py --operationName ping-receive --serviceName service-a -t ./example1 -o ./example1 --parallelism 1 --rootTrace
+```
+
+## Example 2
+I've also exported a trace from a [video application](https://github.com/marcel-dempers/docker-development-youtube-series/tree/master/tracing). See `example2/criticalPaths.html` for output summary and flame graphs for critical paths.
+
+#### Application architecture
+```
 +------------+     +---------------+    +--------------+
 | videos-web +---->+ playlists-api +--->+ playlists-db |
 |            |     |               |    |    [redis]   |
@@ -53,7 +68,7 @@ To demonstrate the usage of CRISP, I've exported a trace from a [sample applicat
 ```
 #### Command
 ```bash
-python3 process.py --operationName "playlists-api: GET /" --serviceName playlists-api -t ./example -o ./example --parallelism 8
+python3 process.py --operationName "playlists-api: GET /" --serviceName playlists-api -t ./example2 -o ./example2 --parallelism 8 --rootTrace
 ```
 
 

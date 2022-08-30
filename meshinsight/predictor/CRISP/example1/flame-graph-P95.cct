@@ -1,0 +1,3 @@
+[service-a] ping-receive;[service-a] ping-send;[service-b] ping-receive 2250
+[service-a] ping-receive;[service-a] ping-send 81136
+[service-a] ping-receive 8006
