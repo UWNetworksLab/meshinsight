@@ -1,0 +1,11 @@
+CRISP:
+  # path of the trace directory
+  TRACE_DIR: ./example1
+  # service name and operation name are in Jaeger terminology
+  SERVICE_NAME: service-a
+  OPERATION_NAME: ping-receive
+  # Should the service and operation be the root span of the trace
+  ROOT_TRACE: False
+  # number of concurrent python processes.
+  PARALLELISM: 1
+

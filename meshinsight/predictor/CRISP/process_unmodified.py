@@ -35,6 +35,104 @@ def dirPathCheck(path):
         raise argparse.ArgumentTypeError(
             f"readable_dir:{path} is not a valid path")
 
+
+argParser = argparse.ArgumentParser()
+argParser.add_argument('-a',
+                       '--operationName',
+                       action='store',
+                       help='operation name',
+                       required=True,
+                       type=str)
+argParser.add_argument('-s',
+                       '--serviceName',
+                       action='store',
+                       help='name of the service',
+                       required=True,
+                       type=str)
+argParser.add_argument(
+    '--rootTrace',
+    dest='rootTrace',
+    action='store_true',
+    default=False,
+    required=False,
+    help=
+    "Should the service and operation be the root span of the trace (default:false)."
+)
+
+argParser.add_argument(
+    '--anonymize',
+    dest='anonymize',
+    action='store_true',
+    default=False,
+    required=False,
+    help="Should the service and operation names be anonymized (default:false)."
+)
+
+argParser.add_argument(
+    '-t',
+    '--traceDir',
+    action='store',
+    type=dirPathCheck,
+    help='path of the trace directory (mutually exclusive with --file)',
+    default=None)
+argParser.add_argument(
+    '--file',
+    type=argparse.FileType('r'),
+    action='store',
+    help='input path of the trace file (mutually exclusivbe with --traceDir)',
+    default=None)
+argParser.add_argument('-o',
+                       '--outputDir',
+                       required=True,
+                       action='store',
+                       help='directory where output will be produced',
+                       type=dirPathCheck)
+argParser.add_argument('--parallelism',
+                       action='store',
+                       help="number of concurrent python processes.",
+                       default=1,
+                       type=int)
+argParser.add_argument('--topN',
+                       action='store',
+                       help='number of services to show in the summary',
+                       default=5,
+                       type=int)
+argParser.add_argument('--numTrace',
+                       action='store',
+                       help='number of traces to show in the heatmap',
+                       default=100,
+                       type=int)
+argParser.add_argument('--numOperation',
+                       action='store',
+                       help='number of operations to show in the heatmap',
+                       default=100,
+                       type=int)
+
+args = argParser.parse_args()
+operationName = args.operationName
+serviceName = args.serviceName
+tracesDir = args.traceDir
+topN = args.topN
+numOperation = args.numOperation
+numTrace = args.numTrace
+rootTrace = args.rootTrace
+anonymize = args.anonymize
+
+if args.file == None and args.traceDir == None:
+    print("One of --inpiut/--file should be set.")
+    sys.exit(-1)
+
+if args.file != None and args.traceDir != None:
+    print("Only one of --inpiut/--file should be set.")
+    sys.exit(-1)
+
+jaegerTraceFiles = []
+
+if args.file != None:
+    jaegerTraceFiles = [args.file.name]
+else:
+    jaegerTraceFiles = glob.glob(os.path.join(tracesDir, '*.json'))
+
 htmlPrefixStr = '''
 <html>
   <head><title>CRISP: Critical Path Report</title>
@@ -170,7 +268,7 @@ def process(filename):
         # artifically introduce the totalTime entry
         metrics.opTimeExclusive['totalTime'] = graph.rootNode.duration
         metrics.opTimeInclusive['totalTime'] = graph.rootNode.duration
-        return metrics, res
+        return metrics
 
 
 def mapReduce(numWorkers, jaegerTraceFiles):
@@ -722,15 +820,56 @@ def sanitizeNames(metric):
             for v in vals:
                 r.callChain[sk].add(sanitized(v))
 
-serviceName = ""
-operationName = ""
-rootTrace = True
 
-def run_crisp(trace_dir, _serviceName, _operationName, _rootTrace, parallelism=1):
-    dirPathCheck(trace_dir)
-    jaegerTraceFiles = glob.glob(os.path.join(trace_dir, '*.json'))
-    global operationName, serviceName, rootTrace
-    operationName = _operationName
-    serviceName = _serviceName
-    rootTrace = _rootTrace
-    return mapReduce(parallelism, jaegerTraceFiles)
+if __name__ == '__main__':
+    logging.info("Starting mapReduce")
+    metrics = mapReduce(args.parallelism, jaegerTraceFiles)
+
+    maxNodes = 0
+    totalNodes = 0
+    maxDepth = 0
+    for i in metrics:
+        totalNodes = totalNodes + i.numNodes
+        maxNodes = i.numNodes if i.numNodes > maxNodes else maxNodes
+        maxDepth = i.depth if i.depth > maxDepth else maxDepth
+    logging.info(
+        f"maxNodes = {maxNodes}, totalNodes={totalNodes}, maxDepth={maxDepth}")
+
+    if anonymize:
+        sanitizeNames(metrics)
+    logging.info("Starting aggregateMetrics")
+    exclusive, inclusive, aggregateCallMap = aggregateMetrics(
+        metrics, jaegerTraceFiles)
+    traceIDIndex = [
+        os.path.splitext(os.path.basename(i))[0] for i in jaegerTraceFiles
+    ]
+    # create a map of from traceID to the corresponding spanID.
+    traceToRootspanMap = {}
+    for i in range(len(traceIDIndex)):
+        traceID = traceIDIndex[i]
+        spanID = metrics[i].rootSpanID
+        traceToRootspanMap[traceID] = spanID
+
+    logging.info("Starting flameGraph")
+    flameGraphPctFilePair, differentialFlameGraphFiles = flameGraph(
+        metrics, getOutputDir())
+
+    logging.info("Starting heatmapAndSummary")
+    heatMap, summary = heatmapAndSummary(exclusive, inclusive,
+                                         aggregateCallMap, traceIDIndex,
+                                         traceToRootspanMap)
+
+    criticalPathHTMLFile = os.path.join(args.outputDir, 'criticalPaths.html')
+
+    logging.info("[%s]%s critical path file %s", args.serviceName,
+                 args.operationName, criticalPathHTMLFile)
+
+    with open(criticalPathHTMLFile, 'w') as f:
+        f.write(htmlPrefixStr + heatMap)
+        f.write(htmlGenerationTime)
+        for pval, file in flameGraphPctFilePair:
+            src = os.path.basename(file)
+            f.write('<div> <h2>%s flame graph. </h2> <img src=%s></div>' %
+                    (pval, src))
+        f.write(summary)
+        f.write(htmlSuffixStr)

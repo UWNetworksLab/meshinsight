@@ -6,12 +6,17 @@ import numpy as np
 import argparse
 import subprocess
 
+from CRISP.process import *
+from config.parser import *
+
 def parse_args(MESHINSIGHT_DIR):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-p", "--profile", type=str, default=os.path.join(MESHINSIGHT_DIR, \
         "meshinsight/profiles/profile.pkl"), help="path to the profile")
-    parser.add_argument("-c", "--call_graph", type=str, required=True, help="path to call graph file")    
+    parser.add_argument("-c", "--call_graph", type=str, required=False, help="path to call graph file") 
+    parser.add_argument("-t", "--trace_dir", type=str, required=True, help="path to jaeger trace directory")       
+    parser.add_argument("-d", "--deployment_dir", type=str, required=False, help="path to deployment yaml files")
     return parser.parse_args()
 
 def get_platform_info():
@@ -87,6 +92,13 @@ if __name__ == '__main__':
         logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
     else:
         logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+
+    cfg = get_config("config/base.yml")
+    cfg.update_path(MESHINSIGHT_DIR)
+
+
+    # print(run_crisp(cfg.TRACE_DIR, cfg.SERVICE_NAME, cfg.OPERATION_NAME, cfg.ROOT_TRACE))
+
 
     # Read call graph
     with open(args.call_graph, "r") as fin:

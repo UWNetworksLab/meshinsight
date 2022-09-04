@@ -104,7 +104,7 @@ class GraphNode():
     Since, sometimes we edit these time values, we record originalStartTime and originalDuration.
     """
     def __init__(self, sid, startTime, duration, parentSpanId, opName,
-                 processID):
+                 processID, serviceName):
         self.sid = sid
         self.startTime = startTime
         self.originalStartTime = startTime
@@ -115,6 +115,7 @@ class GraphNode():
         self.parent = None
         self.opName = opName
         self.pid = processID
+        self.serviceName = serviceName
         self.children = {}
 
     def setParent(self, parent):
@@ -124,7 +125,7 @@ class GraphNode():
         self.children[child] = True
 
     def __repr__(self):
-        return f'Node(SpanID={self.sid}, startTime={self.startTime}, duration={self.duration}, parent={self.parent}, opName={self.opName})'
+        return f'Node(SpanID={self.sid}, startTime={self.startTime}, duration={self.duration}, parent={self.parent}, opName={self.opName}, serviceName={self.serviceName})'
 
 
 class Graph():
@@ -253,7 +254,15 @@ class Graph():
 
         potentialRoots = []
 
-        # pass 1: extract all spans and create one GraphNode for each.
+        # pass 1: record service names and other KV data
+        for item in jsonData['data']:
+            for p in item[_PROCESSES]:
+                self.processName[p] = item[_PROCESSES][p]['serviceName']
+                for dictionary in item[_PROCESSES][p][_TAGS]:
+                    if dictionary['key'] == _HOSTNAME:
+                        self.hostMap[p] = dictionary['value']
+
+        # pass 2: extract all spans and create one GraphNode for each.
         for item in jsonData['data']:
             for span in item[_SPANS]:
                 thisSpan = span[_SPAN_ID]
@@ -269,11 +278,12 @@ class Graph():
                     span[_DURATION],
                     parentSpanId,  # no parent YET, only spanID is available.
                     span[_OPERATION_NAME],
-                    span[_PROCESS_ID])
+                    span[_PROCESS_ID],
+                    self.processName[span[_PROCESS_ID]])
 
                 self.nodeHT[thisSpan] = node
 
-        # pass 2: add parent-child relations to GraphNodes.
+        # pass 3: add parent-child relations to GraphNodes.
         for spanId in self.nodeHT:
             me = self.nodeHT[spanId]
             parentId = me.parentSpanId
@@ -290,14 +300,6 @@ class Graph():
             parent = self.nodeHT[parentId]
             me.setParent(parent)
             parent.addChild(me)
-
-        # pass 3: record service names and other KV data
-        for item in jsonData['data']:
-            for p in item[_PROCESSES]:
-                self.processName[p] = item[_PROCESSES][p]['serviceName']
-                for dictionary in item[_PROCESSES][p][_TAGS]:
-                    if dictionary['key'] == _HOSTNAME:
-                        self.hostMap[p] = dictionary['value']
 
         # for testing only, we keep the expected results in _TESTING section of JSON.
         # pass 4 : record test results

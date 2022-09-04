@@ -46,7 +46,7 @@ To demonstrate the usage of CRISP, I've exported a trace from a simple two servi
 
 #### Command
 ```bash
-python3 process.py --operationName ping-receive --serviceName service-a -t ./example1 -o ./example1 --parallelism 1 --rootTrace
+python3 process_unmodified.py --operationName ping-receive --serviceName service-a -t ./example1 -o ./example1 --parallelism 1 --rootTrace
 ```
 
 ## Example 2
@@ -68,7 +68,7 @@ I've also exported a trace from a [video application](https://github.com/marcel-
 ```
 #### Command
 ```bash
-python3 process.py --operationName "playlists-api: GET /" --serviceName playlists-api -t ./example2 -o ./example2 --parallelism 8 --rootTrace
+python3 process_unmodified.py --operationName "playlists-api: GET /" --serviceName playlists-api -t ./example2 -o ./example2 --parallelism 8 --rootTrace
 ```
 
 
