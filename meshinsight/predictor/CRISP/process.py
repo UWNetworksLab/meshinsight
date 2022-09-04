@@ -170,16 +170,16 @@ def process(filename):
         # artifically introduce the totalTime entry
         metrics.opTimeExclusive['totalTime'] = graph.rootNode.duration
         metrics.opTimeInclusive['totalTime'] = graph.rootNode.duration
-        return metrics, res
+        return res
 
 
 def mapReduce(numWorkers, jaegerTraceFiles):
     # Build graph for each trace file and compute its critical path.
     # Use python multiprocessing to split work on to numWorkers.
-    metrics = None
+    critical_path = None
     with Pool(numWorkers) as p:
-        metrics = p.map(process, jaegerTraceFiles)
-    return metrics
+        critical_path = p.map(process, jaegerTraceFiles)
+    return critical_path
 
 
 class SummaryResult:

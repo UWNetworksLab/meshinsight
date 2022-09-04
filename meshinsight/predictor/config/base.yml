@@ -1,6 +1,6 @@
 CRISP:
   # path of the trace directory
-  TRACE_DIR: ./example1
+  TRACE_DIR: ./CRISP/example1
   # service name and operation name are in Jaeger terminology
   SERVICE_NAME: service-a
   OPERATION_NAME: ping-receive

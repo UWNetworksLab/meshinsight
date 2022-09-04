@@ -25,17 +25,6 @@ class YamlParser(edict):
     
     def merge_from_dict(self, config_dict):
         self.update(config_dict)
-    
-    # Change to absolute path
-    def update_path(self, path):
-        path_dict = {}
-        for k, v in self.PATH.items():
-            if "PATH" in k:
-                path_dict[k] = os.path.join(path, v)
-        self.PATH.update(path_dict)
-        # for k, v in self.PATH.items():
-        #         print(k, v)
-
 
 def get_config(config_file=None):
     return YamlParser(config_file=config_file)
