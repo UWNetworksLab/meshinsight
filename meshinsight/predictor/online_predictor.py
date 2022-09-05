@@ -33,19 +33,19 @@ class Critical_Path():
 class Call():
     """
     Call represents a single network call in the critical path
-    serviceName: the service name of the calling service. (Jaeger terminology)
+    service_name: the service name of the calling service. (Jaeger terminology)
     protocol: the proxy type of the call. default: tcp 
     size: the size of the request (in bytes). default: 100 bytes
     rate: (for CPU prediction) request rate in terms of RPS. default: 1000
     """
-    def __init__(self, serviceName, protocol="tcp", size=100, rate=1000):
-        self.serviceName = serviceName
+    def __init__(self, service_name, protocol="tcp", size=100, rate=1000):
+        self.service_name = service_name
         self.protocol = protocol
         self.size = size
         self.rate = rate
     
     def __repr__(self):
-        return f'Call(serviceName={self.serviceName}, protocol={self.protocol}, size={self.size}, rate={self.rate})'
+        return f'Call(service_name={self.service_name}, protocol={self.protocol}, size={self.size}, rate={self.rate})'
 
 
 def parse_args(MESHINSIGHT_DIR):
@@ -55,6 +55,7 @@ def parse_args(MESHINSIGHT_DIR):
         "meshinsight/profiles/profile.pkl"), help="path to the profile")
     # parser.add_argument("-c", "--call_graph", type=str, required=False, help="path to call graph file") 
     parser.add_argument("-c", "--config", type=str, required=True, help="path to config file") 
+    parser.add_argument("-d", "--deployment", type=str, required=False, default="", help="path to k8s deployment file") 
     return parser.parse_args()
 
 def get_platform_info():
@@ -106,7 +107,7 @@ def predict_cpu_overhead(parsed_critical_paths, profile):
         for call in parsed_critical_path.parsed_cp:
             parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol)*call.rate*1000)
 
-def parse_critical_path_from_CRISP(critical_paths):
+def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
     parsed_cps = []
 
     for cp in critical_paths:
@@ -116,7 +117,10 @@ def parse_critical_path_from_CRISP(critical_paths):
         for call in real_cp:
             # TODO: find proxy type from k8s deployment files
             # TODO: add support for auto request size/rate collection
-            parsed_cp.append(Call(call.serviceName))
+            if service_to_proxy and call.service_name in service_to_proxy:
+                parsed_cp.append(Call(call.service_name, service_to_proxy[call.service_name])) 
+            else:
+                parsed_cp.append(Call(call.service_name))
 
         parsed_cps.append(Critical_Path(metrics.opTimeExclusive['totalTime'], metrics.depth, parsed_cp, cp[2]))
 
@@ -151,8 +155,12 @@ if __name__ == '__main__':
         raise Exception("platform's profile not found. Please run offline profiler first\n")    
     profile = profile[platform]
 
+    service_to_proxy = {}
+    if args.deployment:
+        service_to_proxy = parse_k8s(args.deployment)
+
     # Parse call graph
-    parsed_critical_paths = parse_critical_path_from_CRISP(critical_paths)
+    parsed_critical_paths = parse_critical_path_from_CRISP(critical_paths, service_to_proxy)
 
     # Using the model to predict the latency overhead
     predict_latency_overhead(parsed_critical_paths, profile)
