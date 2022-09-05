@@ -157,10 +157,10 @@ def process(filename):
         if graph.rootNode == None:
             return Metrics({}, {}, {}, {}, {}, {}, {}, 0, 0, 0)
 
-        res = graph.findCriticalPath()
-        debug_on and logging.debug("critical path:" + str(res))
+        critical_path = graph.findCriticalPath()
+        debug_on and logging.debug("critical path:" + str(critical_path))
 
-        metrics = graph.getMetrics(res)
+        metrics = graph.getMetrics(critical_path)
         debug_on and logging.debug(metrics.opTimeExclusive)
 
         debug_on and logging.debug(
@@ -170,16 +170,17 @@ def process(filename):
         # artifically introduce the totalTime entry
         metrics.opTimeExclusive['totalTime'] = graph.rootNode.duration
         metrics.opTimeInclusive['totalTime'] = graph.rootNode.duration
-        return res
+
+        return metrics, critical_path, os.path.join(filename)
 
 
 def mapReduce(numWorkers, jaegerTraceFiles):
     # Build graph for each trace file and compute its critical path.
     # Use python multiprocessing to split work on to numWorkers.
-    critical_path = None
+    results = None
     with Pool(numWorkers) as p:
-        critical_path = p.map(process, jaegerTraceFiles)
-    return critical_path
+        results = p.map(process, jaegerTraceFiles)
+    return results
 
 
 class SummaryResult:
@@ -726,7 +727,7 @@ serviceName = ""
 operationName = ""
 rootTrace = True
 
-def run_crisp(trace_dir, _serviceName, _operationName, _rootTrace, parallelism=1):
+def run_CRISP(trace_dir, _serviceName, _operationName, _rootTrace, parallelism=1):
     dirPathCheck(trace_dir)
     jaegerTraceFiles = glob.glob(os.path.join(trace_dir, '*.json'))
     global operationName, serviceName, rootTrace

@@ -10,6 +10,44 @@ sys.path.append("./CRISP")
 from CRISP.process import *
 from config.parser import *
 
+
+class Critical_Path():
+    """
+    Critical_Path contains critical path information of a single trace
+    totalTime: response time of the request
+    depth: depth of the critical path
+    parsed_cp: parsed critical path from CRISP
+    """
+    def __init__(self, totalTime, depth, parsed_cp, trace_name):
+        self.totalTime = totalTime
+        self.depth = depth
+        self.parsed_cp = parsed_cp
+        self.trace_name = trace_name
+        self.latency_overhead = 0.0
+        self.cpu_overhead = 0.0 
+    
+    def __repr__(self):
+        return f'Critical_Path(trace name={self.trace_name}, totalTime={self.totalTime}, depth={self.depth}, parsed_cp={self.parsed_cp}, latency overhead={self.latency_overhead}, cpu overhead={self.cpu_overhead})'
+
+
+class Call():
+    """
+    Call represents a single network call in the critical path
+    serviceName: the service name of the calling service. (Jaeger terminology)
+    protocol: the proxy type of the call. default: tcp 
+    size: the size of the request (in bytes). default: 100 bytes
+    rate: (for CPU prediction) request rate in terms of RPS
+    """
+    def __init__(self, serviceName, protocol="tcp", size=100, rate=-1):
+        self.serviceName = serviceName
+        self.protocol = protocol
+        self.size = size
+        self.rate = rate
+    
+    def __repr__(self):
+        return f'Call(serviceName={self.serviceName}, protocol={self.protocol}, size={self.size}, rate={self.rate})'
+
+
 def parse_args(MESHINSIGHT_DIR):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -37,7 +75,7 @@ def get_platform_info():
 
     return ("CPU: "+cpu_info, "Kernel: "+kernel_info, "Kubernetes: " + k8s_info, "Istio: v"+istio_info)
 
-def parse_call_graph(calls):
+def parse_call_graph_txt(calls):
     result = []
     for call in calls:
         strs = call.split(",")
@@ -57,26 +95,31 @@ def predict(profile, type, size, protocol):
 
     return overhead
     
-def predict_latency_overhead(profile, parsed_call_graph):
-    latency_overhead = 0.0
+def predict_latency_overhead(parsed_critical_paths, profile):
+    for parsed_critical_path in parsed_critical_paths:
+        for call in parsed_critical_path.parsed_cp:
+            parsed_critical_path.latency_overhead += predict(profile, "latency", call.size, call.protocol)
 
-    for call in parsed_call_graph:
-        size = float(call[0])
-        protocol = call[2].lower()
-        latency_overhead += predict(profile, "latency", size, protocol)
+def predict_cpu_overhead(parsed_critical_paths, profile):
+    for parsed_critical_path in parsed_critical_paths:
+        for call in parsed_critical_path.parsed_cp:
+            parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol)*call.rate*1000)
+            
+def parse_critical_path_from_CRISP(critical_paths):
+    parsed_cps = []
 
-    return latency_overhead
+    for cp in critical_paths:
+        metrics = cp[0]
+        real_cp = cp[1]
+        parsed_cp = []
+        for call in real_cp:
+            # TODO: find proxy type from k8s deployment files
+            # TODO: add support for auto request size/rate collection
+            parsed_cp.append(Call(call.serviceName))
 
-def predict_cpu_overhead(profile, parsed_call_graph):
-    cpu_overhead = 0.0
+        parsed_cps.append(Critical_Path(metrics.opTimeExclusive['totalTime'], metrics.depth, parsed_cp, cp[2]))
 
-    for call in parsed_call_graph:
-        size = float(call[0])
-        rate = float(call[1])/1000.0
-        protocol = call[2].lower()
-        cpu_overhead += (predict(profile, "cpu", size, protocol)*rate)
-
-    return cpu_overhead
+    return parsed_cps
 
 
 if __name__ == '__main__':
@@ -93,12 +136,10 @@ if __name__ == '__main__':
         logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     cfg = get_config("config/base.yml")
-    # critical_paths = run_crisp(cfg.CRISP.TRACE_DIR, cfg.CRISP.SERVICE_NAME, cfg.CRISP.OPERATION_NAME, cfg.CRISP.ROOT_TRACE))
 
-    # Read call graph
-    with open(args.call_graph, "r") as fin:
-        calls = [line.rstrip() for line in fin.readlines()]
-
+    # Run CRISP to get the critical path for every trace. returns -> (metrics, critical path)
+    critical_paths = run_CRISP(cfg.CRISP.TRACE_DIR, cfg.CRISP.SERVICE_NAME, cfg.CRISP.OPERATION_NAME, cfg.CRISP.ROOT_TRACE)
+    
     # Read Profile
     with open(args.profile, "rb") as fin:
         profile = pickle.load(fin)
@@ -110,12 +151,11 @@ if __name__ == '__main__':
     profile = profile[platform]
 
     # Parse call graph
-    parsed_call_graph = parse_call_graph(calls)
-
+    parsed_critical_paths = parse_critical_path_from_CRISP(critical_paths)
 
     # Using the model to predict the latency overhead
-    latency_overhead = predict_latency_overhead(profile, parsed_call_graph)
-    cpu_overhead = predict_cpu_overhead(profile, parsed_call_graph)
-    
-    logging.info("The predicted latency overhead is %.2f microseconds", latency_overhead)
-    logging.info("The predicted latency overhead is %.2f virtual cores", cpu_overhead)
+    predict_latency_overhead(parsed_critical_paths, profile)
+    # predict_cpu_overhead(parsed_critical_paths, profile)
+
+    for cp in parsed_critical_paths:
+        print(f"Trace Name: {cp.trace_name}, latency overhead: {cp.latency_overhead}us, cpu overhead: {cp.cpu_overhead}")
