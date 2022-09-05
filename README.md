@@ -44,20 +44,20 @@ Note: The profiler will delete all kubernetes deployments before it starts to mi
 ## Step 2: Run online predictor
 ```bash
 # Run prediction based on book info call graph
-python3 ./meshinsight/predictor/online_predictor.py -c ./samples/call_graph/bookinfo.txt
+python3 ./meshinsight/predictor/online_predictor.py -c ./meshinsight/predictor/config/base.yml
 
-usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CALL_GRAPH
+usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CONFIG
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose
   -p PROFILE, --profile PROFILE
                         path to the profile
-  -c CALL_GRAPH, --call_graph CALL_GRAPH
-                        path to call graph file
+  -c CONFIG, --config CONFIG
+                        path to config file
 ```
 
-Note: To estimate service mesh overhead, you need to provide an [annotated call graph](./samples/call_graph/CALL_GRAPH.md).
+Note: we will add a documentaion for config file soon.
 
 # Repo Structure
 ```

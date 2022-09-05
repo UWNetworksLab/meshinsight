@@ -36,9 +36,9 @@ class Call():
     serviceName: the service name of the calling service. (Jaeger terminology)
     protocol: the proxy type of the call. default: tcp 
     size: the size of the request (in bytes). default: 100 bytes
-    rate: (for CPU prediction) request rate in terms of RPS
+    rate: (for CPU prediction) request rate in terms of RPS. default: 1000
     """
-    def __init__(self, serviceName, protocol="tcp", size=100, rate=-1):
+    def __init__(self, serviceName, protocol="tcp", size=100, rate=1000):
         self.serviceName = serviceName
         self.protocol = protocol
         self.size = size
@@ -53,7 +53,8 @@ def parse_args(MESHINSIGHT_DIR):
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-p", "--profile", type=str, default=os.path.join(MESHINSIGHT_DIR, \
         "meshinsight/profiles/profile.pkl"), help="path to the profile")
-    parser.add_argument("-c", "--call_graph", type=str, required=False, help="path to call graph file") 
+    # parser.add_argument("-c", "--call_graph", type=str, required=False, help="path to call graph file") 
+    parser.add_argument("-c", "--config", type=str, required=True, help="path to config file") 
     return parser.parse_args()
 
 def get_platform_info():
@@ -104,7 +105,7 @@ def predict_cpu_overhead(parsed_critical_paths, profile):
     for parsed_critical_path in parsed_critical_paths:
         for call in parsed_critical_path.parsed_cp:
             parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol)*call.rate*1000)
-            
+
 def parse_critical_path_from_CRISP(critical_paths):
     parsed_cps = []
 
@@ -155,7 +156,7 @@ if __name__ == '__main__':
 
     # Using the model to predict the latency overhead
     predict_latency_overhead(parsed_critical_paths, profile)
-    # predict_cpu_overhead(parsed_critical_paths, profile)
+    predict_cpu_overhead(parsed_critical_paths, profile)
 
     for cp in parsed_critical_paths:
         print(f"Trace Name: {cp.trace_name}, latency overhead: {cp.latency_overhead}us, cpu overhead: {cp.cpu_overhead}")

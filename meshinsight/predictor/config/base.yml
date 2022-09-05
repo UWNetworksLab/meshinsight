@@ -1,5 +1,5 @@
 CRISP:
-  # path of the trace directory
+  # path of the trace directory (traces must be in JSON format)
   TRACE_DIR: ./CRISP/example1
   # service name and operation name are in Jaeger terminology
   SERVICE_NAME: service-a
