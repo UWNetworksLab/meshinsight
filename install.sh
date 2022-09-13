@@ -7,6 +7,7 @@ echo "export MESHINSIGHT_DIR=$PWD" >> ~/.bashrc
 . ~/.bashrc
 
 # Install necessary tools
+sudo apt-get update
 sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
 sudo apt-get install -y sysstat
 
