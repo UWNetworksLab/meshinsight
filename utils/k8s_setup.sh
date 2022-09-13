@@ -93,7 +93,4 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 echo "alias k='kubectl'" >> ~/.bashrc
 . ~/.bashrc
 
-kubectl taint nodes --all node-role.kubernetes.io/master-
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
-
-set +ex
+kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
