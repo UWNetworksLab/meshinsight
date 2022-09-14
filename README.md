@@ -9,6 +9,7 @@ Note: MeshInsight currently only works on Istio. We plan to extend it to other s
 ## Requirements
 - Python (Version >= 3.7)
 - Kubernetes (Idealy version >=1.24)
+  - Run `. ./utils/k8s_setup.sh` to install Kubernetes. (Note - this script is only tested on Ubuntu.)
 
 Run the following script to install necessary tools for MeshInsight:
 ```bash

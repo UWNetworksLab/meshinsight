@@ -53,7 +53,8 @@ sudo apt-get install -y apt-transport-https ca-certificates curl
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+# sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-get install -y kubelet=1.24.4-00 kubeadm=1.24.4-00 kubectl=1.24.4-00
 sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo swapoff -a
@@ -93,4 +94,8 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 echo "alias k='kubectl'" >> ~/.bashrc
 . ~/.bashrc
 
-kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+# This may not work for kubernetes v1.25+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/control-plane:-
+
+set +ex
