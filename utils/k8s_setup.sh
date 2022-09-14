@@ -96,6 +96,6 @@ echo "alias k='kubectl'" >> ~/.bashrc
 
 # This may not work for kubernetes v1.25+
 kubectl taint nodes --all node-role.kubernetes.io/master-
-kubectl taint nodes --all node-role.kubernetes.io/control-plane:-
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 set +ex

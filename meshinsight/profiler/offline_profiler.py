@@ -247,7 +247,7 @@ def run_latency_experiment(protocol, request_sizes, args, syscall_overhead):
 
     # Clean up deployment
     logging.debug("Deleting echo server deployment ...")
-    subprocess.run(["kubectl", "delete", "deployments", "echo"], stdout=subprocess.DEVNULL)
+    clean_up()
     time.sleep(15)
     
     return result

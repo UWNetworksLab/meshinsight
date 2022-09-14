@@ -7,15 +7,18 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+
 import json
 import glob
-import os
+
 from multiprocessing import Pool, Value
 from graph import *
 import argparse
 import re
 import pandas as pd
-import sys
 from datetime import datetime
 import logging
 import subprocess

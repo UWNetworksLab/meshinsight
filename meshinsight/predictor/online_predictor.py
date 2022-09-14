@@ -118,7 +118,10 @@ def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
             # TODO: find proxy type from k8s deployment files
             # TODO: add support for auto request size/rate collection
             if service_to_proxy and call.service_name in service_to_proxy:
-                parsed_cp.append(Call(call.service_name, service_to_proxy[call.service_name])) 
+                if call.service_name not in service_to_proxy:
+                    parsed_cp.append(Call(call.service_name, "tcp")) 
+                else:
+                    parsed_cp.append(Call(call.service_name, service_to_proxy[call.service_name])) 
             else:
                 parsed_cp.append(Call(call.service_name))
 
@@ -140,12 +143,14 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
-    cfg = get_config("config/base.yml")
-
-    # Run CRISP to get the critical path for every trace. returns -> (metrics, critical path)
-    critical_paths = run_CRISP(cfg.CRISP.TRACE_DIR, cfg.CRISP.SERVICE_NAME, cfg.CRISP.OPERATION_NAME, cfg.CRISP.ROOT_TRACE)
+    cfg = get_config(os.path.join(MESHINSIGHT_DIR, "meshinsight/predictor/config/base.yml"))
     
+    logging.debug("Running CRISP to get the critical paths...")
+    # Run CRISP to get the critical path for every trace. returns -> (metrics, critical path)
+    critical_paths = run_CRISP(os.path.join(MESHINSIGHT_DIR,cfg.CRISP.TRACE_DIR), cfg.CRISP.SERVICE_NAME, cfg.CRISP.OPERATION_NAME, cfg.CRISP.ROOT_TRACE)
+
     # Read Profile
+    logging.debug("Loading profile...")
     with open(args.profile, "rb") as fin:
         profile = pickle.load(fin)
 
