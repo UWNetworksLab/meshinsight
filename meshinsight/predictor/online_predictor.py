@@ -72,7 +72,7 @@ def get_platform_info():
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True).stdout.decode("utf-8"))[1]
 
     # Get Envoy Version 
-    istio_info =  re.split(": |\n", subprocess.run("$HOME/istio-1.14.1/bin/istioctl version", \
+    istio_info =  re.split(": |\n", subprocess.run("istioctl version", \
             shell=True, stdout=subprocess.PIPE, check=True).stdout.decode("utf-8"))[1]
 
     return ("CPU: "+cpu_info, "Kernel: "+kernel_info, "Kubernetes: " + k8s_info, "Istio: v"+istio_info)
@@ -115,15 +115,11 @@ def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
         real_cp = cp[1]
         parsed_cp = []
         for call in real_cp:
-            # TODO: find proxy type from k8s deployment files
             # TODO: add support for auto request size/rate collection
-            if service_to_proxy and call.service_name in service_to_proxy:
-                if call.service_name not in service_to_proxy:
-                    parsed_cp.append(Call(call.service_name, "tcp")) 
-                else:
-                    parsed_cp.append(Call(call.service_name, service_to_proxy[call.service_name])) 
+            if service_to_proxy and call.serviceName in service_to_proxy:
+                parsed_cp.append(Call(call.serviceName, service_to_proxy[call.serviceName])) 
             else:
-                parsed_cp.append(Call(call.service_name))
+                parsed_cp.append(Call(call.serviceName))
 
         parsed_cps.append(Critical_Path(metrics.opTimeExclusive['totalTime'], metrics.depth, parsed_cp, cp[2]))
 
@@ -172,4 +168,4 @@ if __name__ == '__main__':
     predict_cpu_overhead(parsed_critical_paths, profile)
 
     for cp in parsed_critical_paths:
-        print(f"Trace Name: {cp.trace_name}, latency overhead: {cp.latency_overhead}us, cpu overhead: {cp.cpu_overhead}")
+        print(f"Trace Name: {cp.trace_name}, (average) latency overhead: {cp.latency_overhead[0]} us, cpu overhead: {cp.cpu_overhead[0]} virtual cores")

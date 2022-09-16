@@ -29,9 +29,10 @@ mesh configuration, and application workload.
 ## Step 1: Run offline profiler
 ```bash
 # Run profiler for latency and cpu overhead profile.
+# Once it completes, the profile will be saved to meshinsight/profiles/
 sudo python3 ./meshinsight/profiler/offline_profiler.py -d 30 --latency --cpu
 
-usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION]
+usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION] 
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -42,10 +43,11 @@ optional arguments:
                         default duration is 15s                    
 ```
 Note: The profiler will delete all kubernetes deployments before it starts to minimize interference.
+
 ## Step 2: Run online predictor
 ```bash
 # Run prediction based on book info call graph
-python3 ./meshinsight/predictor/online_predictor.py -c ./meshinsight/predictor/config/base.yml
+python3 ./meshinsight/predictor/online_predictor.py -c ./meshinsight/predictor/config/base.yml -p meshinsight/profiles/profile.pkl
 
 usage: online_predictor.py [-h] [-v] [-p PROFILE] -c CONFIG
 
@@ -58,7 +60,7 @@ optional arguments:
                         path to config file
 ```
 
-Note: we will add a documentaion for config file soon.
+Please see `TRACE.md` for reference of config files.
 
 # Repo Structure
 ```

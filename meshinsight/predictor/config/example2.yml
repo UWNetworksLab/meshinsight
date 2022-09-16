@@ -1,0 +1,11 @@
+CRISP:
+  # path of the trace directory (traces must be in JSON format)
+  TRACE_DIR: meshinsight/predictor/CRISP/example2
+  # service name and operation name are in Jaeger terminology
+  SERVICE_NAME: playlists-api
+  OPERATION_NAME: "playlists-api: GET /"
+  # Should the service and operation be the root span of the trace
+  ROOT_TRACE: False
+  # number of concurrent python processes.
+  PARALLELISM: 1
+
