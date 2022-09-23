@@ -12,14 +12,14 @@ spec:
   hostPath:
     path: /mnt/volumes/geo-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h2.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h2.amd.meshbench-pg0.utah.cloudlab.us
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -35,14 +35,14 @@ spec:
   hostPath:
     path: /mnt/volumes/profile-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h2.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h2.amd.meshbench-pg0.utah.cloudlab.us
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -58,14 +58,14 @@ spec:
   hostPath:
     path: /mnt/volumes/rate-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h2.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h2.amd.meshbench-pg0.utah.cloudlab.us
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -81,14 +81,14 @@ spec:
   hostPath:
     path: /mnt/volumes/recommendation-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h3.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h3.amd.meshbench-pg0.utah.cloudlab.us
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -104,14 +104,14 @@ spec:
   hostPath:
     path: /mnt/volumes/reservation-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h2.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h2.amd.meshbench-pg0.utah.cloudlab.us
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -127,12 +127,12 @@ spec:
   hostPath:
     path: /mnt/volumes/user-pv   # Where all the hard drives are mounted
     type: DirectoryOrCreate
-  nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - h3.amd.meshbench-pg0.utah.cloudlab.us
+  # nodeAffinity:     # Use nodeAffinity to ensure it will only be mounted on the node with harddrives.
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: kubernetes.io/hostname
+  #             operator: In
+  #             values:
+  #               - h3.amd.meshbench-pg0.utah.cloudlab.us
 ---

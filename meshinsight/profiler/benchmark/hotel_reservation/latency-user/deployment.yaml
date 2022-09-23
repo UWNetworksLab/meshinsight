@@ -119,7 +119,7 @@ spec:
     spec:
       # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
-        - image: mongo
+        - image: mongo:4.4.6
           name: hotel-reserv-user-mongo
           ports:
             - containerPort: 27017
@@ -170,7 +170,7 @@ spec:
       containers:
         - command:
             - user
-          image: xzhu0027/hotel_reserv_user_single_node:test
+          image: xzhu0027/hotel_reserv_user_single_node
           name: hotel-reserv-user
           ports:
             - containerPort: 8086

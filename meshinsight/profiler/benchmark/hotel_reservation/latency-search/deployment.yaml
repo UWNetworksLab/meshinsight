@@ -26,7 +26,7 @@ spec:
       labels:
         io.kompose.service: consul
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: consul:latest
           name: consul
@@ -74,7 +74,7 @@ spec:
       labels:
         io.kompose.service: frontend
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - frontend
@@ -116,7 +116,7 @@ spec:
       labels:
         io.kompose.service: geo
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - geo
@@ -158,7 +158,7 @@ spec:
       labels:
         io.kompose.service: profile
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - profile
@@ -200,7 +200,7 @@ spec:
       labels:
         io.kompose.service: rate
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - rate
@@ -242,7 +242,7 @@ spec:
       labels:
         io.kompose.service: recommendation
     spec:
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - recommendation
@@ -284,7 +284,7 @@ spec:
       labels:
         io.kompose.service: reservation
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - reservation
@@ -326,7 +326,7 @@ spec:
       labels:
         io.kompose.service: search
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - search
@@ -369,11 +369,11 @@ spec:
       labels:
         io.kompose.service: user
     spec:
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - user
-          image: xzhu0027/hotel_reserv_user_single_node:test
+          image: xzhu0027/hotel_reserv_user_single_node
           name: hotel-reserv-user
           ports:
             - containerPort: 8086
@@ -411,7 +411,7 @@ spec:
       labels:
         io.kompose.service: memcached-profile
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - env:
             - name: MEMCACHED_CACHE_SIZE
@@ -456,7 +456,7 @@ spec:
       labels:
         io.kompose.service: memcached-rate
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - env:
             - name: MEMCACHED_CACHE_SIZE
@@ -501,7 +501,7 @@ spec:
       labels:
         io.kompose.service: memcached-reserve
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - env:
             - name: MEMCACHED_CACHE_SIZE
@@ -547,7 +547,7 @@ spec:
       labels:
         io.kompose.service: mongodb-geo
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-geo-mongo
@@ -595,7 +595,7 @@ spec:
       labels:
         io.kompose.service: mongodb-profile
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us÷
       containers:
         - image: mongo
           name: hotel-reserv-profile-mongo
@@ -644,7 +644,7 @@ spec:
       labels:
         io.kompose.service: mongodb-rate
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-rate-mongo
@@ -692,7 +692,7 @@ spec:
       labels:
         io.kompose.service: mongodb-recommendation
     spec:
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-recommendation-mongo
@@ -741,7 +741,7 @@ spec:
       labels:
         io.kompose.service: mongodb-reservation
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-reservation-mongo
@@ -790,7 +790,7 @@ spec:
       labels:
         io.kompose.service: mongodb-user
     spec:
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-user-mongo
