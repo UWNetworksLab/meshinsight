@@ -26,7 +26,7 @@ spec:
       labels:
         io.kompose.service: consul
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: consul:latest
           name: consul
@@ -74,7 +74,7 @@ spec:
       labels:
         io.kompose.service: frontend
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - frontend
@@ -117,7 +117,7 @@ spec:
       labels:
         io.kompose.service: mongodb-user
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - image: mongo
           name: hotel-reserv-user-mongo
@@ -166,7 +166,7 @@ spec:
       labels:
         io.kompose.service: user
     spec:
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - command:
             - user
