@@ -186,7 +186,7 @@ spec:
         # sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: default
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
         - name: server
           image: xzhu0027/online_boutique_frontend:latest
@@ -303,7 +303,7 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
       - name: server
         image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.3.0
@@ -352,7 +352,7 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
       - name: server
         image: xzhu0027/online_boutique_cart:latest
@@ -397,7 +397,7 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
       - name: server
         image: gcr.io/google-samples/microservices-demo/currencyservice:v0.3.0
@@ -444,7 +444,7 @@ spec:
         app: shippingservice
     spec:
       serviceAccountName: default
-      nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h2.amd.meshbench-pg0.utah.cloudlab.us
       containers:
       - name: server
         image: gcr.io/google-samples/microservices-demo/shippingservice:v0.3.0
@@ -537,7 +537,7 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
-      nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
+      # nodeName: h3.amd.meshbench-pg0.utah.cloudlab.us
       containers:
       - name: server
         image: gcr.io/google-samples/microservices-demo/adservice:v0.3.4
