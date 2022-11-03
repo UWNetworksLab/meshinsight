@@ -68,8 +68,8 @@ Repo Root
 |---- benchmark   
 |---- meshinsight   # MeshInsight source code
   |---- profiler    # Source code for offline profiler
+    |---- benchmark   # Benchmarks used in the paper and their wrk scripts
   |---- predictor   # Source code for online predictor
-  |---- benchmark   # Benchmarks used in the paper and their wrk scripts
 |---- utils         # Some other tools for analyzing service mesh deployments
 |---- samples       # Demo of service mesh performance analysis
 ```
