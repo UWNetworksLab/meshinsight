@@ -20,7 +20,7 @@ cd $MESHINSIGHT_DIR
 sudo apt update
 sudo apt install -y bison build-essential cmake flex git libedit-dev   libllvm11 llvm-11-dev libclang-11-dev python zlib1g-dev libelf-dev libfl-dev python3-distutils
 # Delete if installed
-if [ -d "$MESHINSIGHT_DIR/bcc"];
+if [ -d "$MESHINSIGHT_DIR/bcc" ];
 then sudo rm -rf $MESHINSIGHT_DIR/bcc;
 fi
 git clone https://github.com/iovisor/bcc.git
@@ -37,7 +37,7 @@ popd
 # Install Istio
 cd $MESHINSIGHT_DIR
 # Delete if installed
-if [ -d "$MESHINSIGHT_DIR/istio-1.14.1"];
+if [ -d "$MESHINSIGHT_DIR/istio-1.14.1" ];
 then sudo rm -rf $MESHINSIGHT_DIR/istio-1.14.1;
 fi
 curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
@@ -57,7 +57,7 @@ sudo luarocks install luasocket
 
 cd $MESHINSIGHT_DIR/meshinsight/profiler
 # Delete if installed
-if [ -d "$MESHINSIGHT_DIR/meshinsight/profiler/wrk"];
+if [ -d "$MESHINSIGHT_DIR/meshinsight/profiler/wrk" ];
 then sudo rm -rf $MESHINSIGHT_DIR/meshinsight/profiler/wrk;
 fi
 git clone https://github.com/wg/wrk.git
@@ -66,7 +66,7 @@ make -j $(nproc)
 
 cd $MESHINSIGHT_DIR/meshinsight/profiler
 # Delete if installed
-if [ -d "$MESHINSIGHT_DIR/meshinsight/profiler/wrk2"];
+if [ -d "$MESHINSIGHT_DIR/meshinsight/profiler/wrk2" ];
 then sudo rm -rf $MESHINSIGHT_DIR/meshinsight/profiler/wrk2;
 fi
 git clone https://github.com/giltene/wrk2.git
