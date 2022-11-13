@@ -47,7 +47,7 @@ istioctl x precheck
 istioctl install --set profile=default -y
 
 # turn on auto-injection
-kubectl label namespace default istio-injection=enabled
+kubectl label namespace default istio-injection=enabled --overwrite
 # turn off auto-injection
 # kubectl label namespace default istio-injection-
 
