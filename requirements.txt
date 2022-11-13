@@ -2,6 +2,7 @@ numpy
 kubernetes
 docker
 sklearn
+scikit-learn
 pandas
 easydict
 pyyaml>=5.4.1
