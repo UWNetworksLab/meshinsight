@@ -139,7 +139,7 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
-    cfg = get_config(os.path.join(MESHINSIGHT_DIR, "meshinsight/predictor/config/base.yml"))
+    cfg = get_config(os.path.join(MESHINSIGHT_DIR, args.config))
     
     logging.debug("Running CRISP to get the critical paths...")
     # Run CRISP to get the critical path for every trace. returns -> (metrics, critical path)
