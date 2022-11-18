@@ -53,8 +53,8 @@ def parse_args(MESHINSIGHT_DIR):
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-p", "--profile", type=str, default=os.path.join(MESHINSIGHT_DIR, \
         "meshinsight/profiles/profile.pkl"), help="path to the profile")
-    # parser.add_argument("-c", "--call_graph", type=str, required=False, help="path to call graph file") 
     parser.add_argument("-c", "--config", type=str, required=True, help="path to config file") 
+    parser.add_argument("-s", "--speedup", type=str, required=False, help="path to component speed-up profile") 
     parser.add_argument("-d", "--deployment", type=str, required=False, default="", help="path to k8s deployment file") 
     return parser.parse_args()
 
@@ -169,3 +169,9 @@ if __name__ == '__main__':
 
     for cp in parsed_critical_paths:
         print(f"Trace Name: {cp.trace_name}, (average) latency overhead: {cp.latency_overhead[0]} us, cpu overhead: {cp.cpu_overhead[0]} virtual cores")
+
+
+    # Performance speedup prediction
+    if args.speedup:
+        speedup_profile = get_config(args.speedup)
+        

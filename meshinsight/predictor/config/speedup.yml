@@ -1,0 +1,7 @@
+# Component Speed-up profile (in percentage)
+SPEEDUP:
+  IPC: 10
+  READ: 0
+  WRITE: 50
+  EPOLL: 0
+  USER: 0

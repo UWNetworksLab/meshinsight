@@ -25,3 +25,10 @@ Full example is shown in `meshinsight/predictor/config/example1.yml`. We provide
 ## Sidecar Proxy Configurations
 
 We will automatically parse the proxy configurations if you give MeshInsight the deployment files (i.e., Kubernetes yaml files). If we cannot match the service name in the trace and in the deployment files, MeshInsight will assume the proxy is configured as a TCP proxy. 
+
+
+## Quantifying the impact of service mesh optimizations
+
+MeshInsight an also predict the end-to-end impact of an optimization (e.g., using Unix domain socket instead of loopback). To enable this estimation, you need to provide information (i,e., a speedup profile) on the impact of the optization for the component(s) you have optimized. See `meshinsight/predictor/config/speedup.yml` for an example speedup profile.
+
+Alternatively, new performance profiles may be based on running offline profiling after implementing the optimization.
