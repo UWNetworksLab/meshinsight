@@ -1,7 +1,7 @@
 # Component Speed-up profile (in percentage)
-SPEEDUP:
-  IPC: 10
-  READ: 0
-  WRITE: 50
-  EPOLL: 0
-  USER: 0
+# For example, write: 10 means there is a 10% speedup on the write component
+IPC: 10 
+READ: 0
+WRITE: 50
+EPOLL: 0
+USER: 0

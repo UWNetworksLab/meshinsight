@@ -25,9 +25,13 @@ class Critical_Path():
         self.trace_name = trace_name
         self.latency_overhead = 0.0
         self.cpu_overhead = 0.0 
+        self.latency_overhead_opt = 0.0
+        self.cpu_overhead_opt = 0.0
     
     def __repr__(self):
-        return f'Critical_Path(trace name={self.trace_name}, totalTime={self.totalTime}, depth={self.depth}, parsed_cp={self.parsed_cp}, latency overhead={self.latency_overhead}, cpu overhead={self.cpu_overhead})'
+        return f'Critical_Path(trace name={self.trace_name}, totalTime={self.totalTime}, depth={self.depth}, parsed_cp={self.parsed_cp}, \
+            latency overhead={self.latency_overhead}, cpu overhead={self.cpu_overhead}, latency overhead(after optimization)={self.latency_overhead_opt},\
+                 cpu overhead(after optimization)={self.cpu_overhead_opt})'
 
 
 class Call():
@@ -87,25 +91,45 @@ def parse_call_graph_txt(calls):
         result.append([size, rate, protocol])
     return result
 
-def predict(profile, type, size, protocol):
+def predict(profile, type, size, protocol, speedup=None):
     components = ["read_reg", "write_reg", "epoll_reg", "ipc_reg", "envoy_reg"]
 
     models = profile[type][protocol]
     overhead = 0.0
-    for component in components:
-        overhead += models[component].predict(np.array([[size]]))
+
+    if speedup:
+        overhead += (models["read_reg"].predict(np.array([[size]])) * (100-speedup.SPEEDUP.READ)/100)
+        overhead += (models["write_reg"].predict(np.array([[size]])) * (100-speedup.SPEEDUP.WRITE))
+        overhead += (models["epoll_reg"].predict(np.array([[size]])) * (100-speedup.SPEEDUP.EPOLL))
+        overhead += (models["ipc_reg"].predict(np.array([[size]])) * (100-speedup.SPEEDUP.IPC))
+        overhead += (models["envoy_reg"].predict(np.array([[size]])) * (100-speedup.SPEEDUP.USER))
+    else:
+
+        overhead += models["read_reg"].predict(np.array([[size]]))
+        overhead += models["write_reg"].predict(np.array([[size]]))
+        overhead += models["epoll_reg"].predict(np.array([[size]]))
+        overhead += models["ipc_reg"].predict(np.array([[size]]))
+        overhead += models["envoy_reg"].predict(np.array([[size]]))
 
     return overhead
     
-def predict_latency_overhead(parsed_critical_paths, profile):
+def predict_latency_overhead(parsed_critical_paths, profile, speedup=None):
     for parsed_critical_path in parsed_critical_paths:
         for call in parsed_critical_path.parsed_cp:
-            parsed_critical_path.latency_overhead += predict(profile, "latency", call.size, call.protocol)
+            if speedup:
+                parsed_critical_path.latency_overhead_opt += predict(profile, "latency", call.size, call.protocol, speedup)
+            else:
+                parsed_critical_path.latency_overhead += predict(profile, "latency", call.size, call.protocol, speedup)
+        
 
-def predict_cpu_overhead(parsed_critical_paths, profile):
+def predict_cpu_overhead(parsed_critical_paths, profile, speedup=None):
     for parsed_critical_path in parsed_critical_paths:
         for call in parsed_critical_path.parsed_cp:
-            parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol)*call.rate*1000)
+            if speedup:
+                parsed_critical_path.cpu_overhead_opt += (predict(profile, "cpu", call.size, call.protocol, speedup)*call.rate*1000)
+            else:
+                parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol, speedup)*call.rate*1000)
+        
 
 def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
     parsed_cps = []
@@ -174,4 +198,9 @@ if __name__ == '__main__':
     # Performance speedup prediction
     if args.speedup:
         speedup_profile = get_config(args.speedup)
-        
+ 
+        predict_latency_overhead(parsed_critical_paths, profile, speedup_profile)
+        predict_cpu_overhead(parsed_critical_paths, profile, speedup_profile )
+
+        for cp in parsed_critical_paths:
+            print(f"Trace Name: {cp.trace_name}, (average) latency overhead after optimization: {cp.latency_overhead_opt[0]} us, cpu overhead after optimization: {cp.cpu_overhead_opt[0]} virtual cores")
