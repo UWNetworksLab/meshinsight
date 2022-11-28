@@ -42,7 +42,9 @@ optional arguments:
   -d DURATION, --duration DURATION
                         default duration is 15s                    
 ```
-Note: The profiler will delete all kubernetes deployments before it starts to minimize interference.
+Note: 
+1. The profiler will delete all kubernetes deployments before it starts to minimize interference.
+2. We recommend running the offline profiler on a machine that has at least 16 cores. 
 
 ## Step 2: Run online predictor
 ```bash
