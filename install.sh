@@ -48,8 +48,6 @@ istioctl install --set profile=default -y
 
 # turn on auto-injection
 kubectl label namespace default istio-injection=enabled --overwrite
-# turn off auto-injection
-# kubectl label namespace default istio-injection-
 
 # Install wrk and wrk2
 sudo apt-get install luarocks -y
