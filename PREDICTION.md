@@ -1,10 +1,13 @@
 # Online Prediction
 
-MeshInsight relies on critical path and sidecar proxy configurations to generate overhead prediction. To this end, we have integrated MeshInsight with [CRISP](https://github.com/uber-research/CRISP), a critical path extractor developed by Uber. 
+MeshInsight relies on critical path, sidecar proxy configurations, and workload characteristics to generate overhead prediction. We provide two options for you to provide these information
 
 
-## CRISP
-To use CRISP, you need to provide a few parameters (in yaml format) listed below. 
+1. We have integrated MeshInsight with [CRISP](https://github.com/uber-research/CRISP), a critical path extractor developed by Uber. MeshInsight also tries to extract the proxy configuration from Kubernetes deployment files if possible.
+2. You can also provide the critical path, sidecar proxy configurations, and workload characteristics in JSON format (see below)
+
+## Option 1
+To use the CRISP option , you need to provide a few parameters (in yaml format) listed below. 
 
 ```YAML
 CRISP:
@@ -22,10 +25,13 @@ CRISP:
 Full example is shown in `meshinsight/predictor/config/example1.yml`. We provide two sample traces in `meshinsight/predictor/CRISP/example1` and `meshinsight/predictor/CRISP/example2`
 
 
-## Sidecar Proxy Configurations
+## Sidecar Proxy Configurations and workload characteristics
 
-We will automatically parse the proxy configurations if you give MeshInsight the deployment files (i.e., Kubernetes yaml files). If we cannot match the service name in the trace and in the deployment files, MeshInsight will assume the proxy is configured as a TCP proxy. 
+If you use the CRISP option, MeshInsight will automatically parse the proxy configurations if you give MeshInsight the deployment files (i.e., Kubernetes yaml files). If MeshInsight cannot match the service name in the trace and in the deployment files, it will assume the proxy is configured as a TCP proxy. In addition, because Jaeger traces does not include workload characteristics, MeshInsight will use a default size (100B) and rate (1000 Req/Sec) for all calls in the call graph. (You can override these values with `--size` and `--rate`)
 
+## Option 2 
+
+This option will be added soon.
 
 ## Quantifying the impact of service mesh optimizations
 

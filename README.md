@@ -1,7 +1,7 @@
 # MeshInsight
 
 # Overview
-MeshInsight is a tool to systematically characterize the overhead of service meshes and to help developers quantify overhead in deployment scenarios of interest. Read the [paper](https://arxiv.org/abs/2207.00592) for how MeshInsight works!
+MeshInsight is a tool to systematically characterize the overhead of service meshes and to help developers quantify the latency and CPU overhead in deployment scenarios of interest. Read the [paper](https://arxiv.org/abs/2207.00592) for how MeshInsight works!
 
 Note: MeshInsight currently only works on Istio. We plan to extend it to other service meshes (e.g., Cilium or Linkerd) in the future.
 
@@ -24,7 +24,7 @@ For details see [INSTALL.md](INSTALL.md).
 
 MeshInsight has an offline profiling phase and an online prediction phase. The offline phase generates performance
 profiles of individual service mesh components, and the online phase predicts overhead based on these profiles, service
-mesh configuration, and application workload.
+mesh configuration, and application workload. Optionally, MeshInsight can predict the performance of an optimization based on  a [speedup profile](https://github.com/UWNetworksLab/meshinsight/blob/main/meshinsight/predictor/config/speedup.yml).
 
 ## Step 1: Run offline profiler
 ```bash

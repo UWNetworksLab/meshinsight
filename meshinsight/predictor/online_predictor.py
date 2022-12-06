@@ -42,7 +42,7 @@ class Call():
     size: the size of the request (in bytes). default: 100 bytes
     rate: (for CPU prediction) request rate in terms of RPS. default: 1000
     """
-    def __init__(self, service_name, protocol="tcp", size=100, rate=1000):
+    def __init__(self, service_name, size, rate, protocol="tcp"):
         self.service_name = service_name
         self.protocol = protocol
         self.size = size
@@ -58,7 +58,9 @@ def parse_args(MESHINSIGHT_DIR):
     parser.add_argument("-p", "--profile", type=str, default=os.path.join(MESHINSIGHT_DIR, \
         "meshinsight/profiles/profile.pkl"), help="path to the profile")
     parser.add_argument("-c", "--config", type=str, required=True, help="path to config file") 
-    parser.add_argument("-s", "--speedup", type=str, required=False, help="path to component speed-up profile") 
+    parser.add_argument("-s", "--speedup", type=str, required=False, help="path to component speed-up profile")
+    parser.add_argument("--size", type=int, default=100, required=False, help="the default request size") 
+    parser.add_argument("--rate", type=int, default=1000, required=False, help="the default request rate") 
     parser.add_argument("-d", "--deployment", type=str, required=False, default="", help="path to k8s deployment file") 
     return parser.parse_args()
 
@@ -131,7 +133,7 @@ def predict_cpu_overhead(parsed_critical_paths, profile, speedup=None):
                 parsed_critical_path.cpu_overhead += (predict(profile, "cpu", call.size, call.protocol, speedup)*call.rate*1000)
         
 
-def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
+def parse_critical_path_from_CRISP(critical_paths, service_to_proxy, default_size, default_rate):
     parsed_cps = []
 
     for cp in critical_paths:
@@ -141,9 +143,9 @@ def parse_critical_path_from_CRISP(critical_paths, service_to_proxy):
         for call in real_cp:
             # TODO: add support for auto request size/rate collection
             if service_to_proxy and call.serviceName in service_to_proxy:
-                parsed_cp.append(Call(call.serviceName, service_to_proxy[call.serviceName])) 
+                parsed_cp.append(Call(call.serviceName, default_size, default_rate, service_to_proxy[call.serviceName])) 
             else:
-                parsed_cp.append(Call(call.serviceName))
+                parsed_cp.append(Call(call.serviceName, default_size, default_rate))
 
         parsed_cps.append(Critical_Path(metrics.opTimeExclusive['totalTime'], metrics.depth, parsed_cp, cp[2]))
 
@@ -185,7 +187,7 @@ if __name__ == '__main__':
         service_to_proxy = parse_k8s(args.deployment)
 
     # Parse call graph
-    parsed_critical_paths = parse_critical_path_from_CRISP(critical_paths, service_to_proxy)
+    parsed_critical_paths = parse_critical_path_from_CRISP(critical_paths, service_to_proxy, args.size, args.rate)
 
     # Using the model to predict the latency overhead
     predict_latency_overhead(parsed_critical_paths, profile)

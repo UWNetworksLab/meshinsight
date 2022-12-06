@@ -5,5 +5,3 @@ PATH:
   PROFILE_PATH: meshinsight/profiler/cpu/profile.py
   STACKCOLLAPSE_PATH: meshinsight/profiler/cpu/stackcollapse-perf.pl
   FLAMEGRAPH_PATH: meshinsight/profiler/cpu/flamegraph.pl
-  # WRK_SCRIPT_DIR: 
-  # ECHO_DEPLOYMENT_DIR
