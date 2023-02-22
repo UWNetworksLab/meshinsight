@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc/pb"
+	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_proxyless/pb"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
@@ -25,7 +25,6 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	message := echo.Msg{
 		Body: request.URL.String(),
-		// Body: "Hello",
 	}
 
 	response, err := c.Echo(context.Background(), &message)
@@ -37,9 +36,10 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
+
 	http.HandleFunc("/", handler)
 
-	fmt.Printf("Starting server at port 8080\n")
+	fmt.Printf("Starting frontend at port 8080\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 type server struct {
-	pb.UnimplementedEchoServiceServer
+	echo.UnimplementedEchoServiceServer
 }
 
 func (s *server) Echo(ctx context.Context, x *echo.Msg) (*echo.Msg, error) {
