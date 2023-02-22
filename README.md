@@ -30,7 +30,7 @@ mesh configuration, and application workload. Optionally, MeshInsight can predic
 ```bash
 # Run profiler for latency and cpu overhead profile.
 # Once it completes, the profile will be saved to meshinsight/profiles/
-sudo python3 ./meshinsight/profiler/offline_profiler.py -d 30 --latency --cpu
+sudo python3 ./meshinsight/profiler/offline_profiler.py --latency --cpu
 
 usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION] 
 
@@ -40,11 +40,13 @@ optional arguments:
   -c, --cpu             run offline latency profiling
   -l, --latency         run offline cpu profiling
   -d DURATION, --duration DURATION
+                        the duration for each measurement
                         default duration is 15s                    
 ```
 Note: 
 1. The profiler will delete all kubernetes deployments before it starts to minimize interference.
 2. We recommend running the offline profiler on a machine that has at least 16 cores. 
+3. The offline profiling phase will take a few hours (~3 hours with duration of 15s)
 
 ## Step 2: Run online predictor
 ```bash
