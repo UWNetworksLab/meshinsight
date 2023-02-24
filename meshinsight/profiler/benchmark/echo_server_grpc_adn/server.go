@@ -6,9 +6,9 @@ import (
 	"net"
 
 	"golang.org/x/net/context"
-	"google.golang.org/grpc/xds"
 
-	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_proxyless/pb"
+	echo "github.com/Romero027/echo-server-grpc-adn/pb"
+	"google.golang.org/grpc"
 )
 
 type server struct {
@@ -25,8 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := xds.NewGRPCServer()
-
+	s := grpc.NewServer()
 	fmt.Printf("Starting server at port 9000\n")
 
 	echo.RegisterEchoServiceServer(s, &server{})

@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	echo "github.com/Romero027/echo-server-grpc/pb"
+	echo "github.com/Romero027/echo-server-grpc-adn/pb"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
@@ -25,7 +25,6 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	message := echo.Msg{
 		Body: request.URL.String(),
-		// Body: "Hello",
 	}
 
 	response, err := c.Echo(context.Background(), &message)

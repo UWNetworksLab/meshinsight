@@ -7,16 +7,15 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	_ "google.golang.org/grpc/xds"
 
-	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_proxyless/pb"
+	echo "github.com/Romero027/echo-server-grpc/pb"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Printf("%s\n", request.URL.String())
 
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial("xds:///echo-server:9000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
@@ -26,6 +25,7 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	message := echo.Msg{
 		Body: request.URL.String(),
+		// Body: "Hello",
 	}
 
 	response, err := c.Echo(context.Background(), &message)
@@ -37,10 +37,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
-
 	http.HandleFunc("/", handler)
 
-	fmt.Printf("Starting frontend at port 8080\n")
+	fmt.Printf("Starting server at port 8080\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
