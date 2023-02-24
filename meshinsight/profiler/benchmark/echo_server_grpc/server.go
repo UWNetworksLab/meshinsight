@@ -7,15 +7,15 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/Romero027/echo-server-grpc/pb"
+	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc/pb"
 	"google.golang.org/grpc"
 )
 
 type server struct {
-	pb.UnimplementedEchoServiceServer
+	echo.UnimplementedEchoServiceServer
 }
 
-func (s *server) Echo(ctx context.Context, x *pb.Msg) (*pb.Msg, error) {
+func (s *server) Echo(ctx context.Context, x *echo.Msg) (*echo.Msg, error) {
 	log.Printf("got: [%s]", x.GetBody())
 	return x, nil
 }
@@ -28,7 +28,7 @@ func main() {
 	s := grpc.NewServer()
 	fmt.Printf("Starting server at port 9000\n")
 
-	pb.RegisterEchoServiceServer(s, &server{})
+	echo.RegisterEchoServiceServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

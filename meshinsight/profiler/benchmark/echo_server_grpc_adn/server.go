@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	echo "github.com/Romero027/echo-server-grpc-adn/pb"
+	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_adn/pb"
 	"google.golang.org/grpc"
 )
 

@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	echo "github.com/Romero027/echo-server-grpc/pb"
+	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_adn/pb"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
