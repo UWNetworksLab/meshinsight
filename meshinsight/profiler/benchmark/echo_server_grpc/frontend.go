@@ -15,7 +15,7 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Printf("%s\n", request.URL.String())
 
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial("echo-server:9000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
@@ -31,9 +31,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	if err == nil {
 		log.Printf("Response from server: %s", response.Body)
 		fmt.Fprintf(writer, "Echo request finished! Length of the request is %d\n", len(response.Body))
-
 	} else {
 		log.Printf("Erro when calling echo: %s", err)
+		fmt.Fprintf(writer, "Echo server returns an error.\n")
 	}
 }
 

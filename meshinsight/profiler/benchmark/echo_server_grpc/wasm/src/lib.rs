@@ -2,7 +2,6 @@ use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 
 use prost::Message;
-
 // pb.rs = echo.proto
 pub mod echo {
     include!(concat!(env!("OUT_DIR"), "/pb.rs"));
@@ -25,7 +24,7 @@ impl Context for AccessControl {}
 
 impl HttpContext for AccessControl {
     fn on_http_request_headers(&mut self, _num_of_headers: usize, end_of_stream: bool) -> Action {
-
+        log::warn!("executing on_http_request_headers");
         if !end_of_stream {
             return Action::Continue;
         }
@@ -35,6 +34,7 @@ impl HttpContext for AccessControl {
     }
 
     fn on_http_request_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
+        // log::warn!("executing on_http_request_body");
         if !end_of_stream {
             // Wait -- we'll be called again when the complete body is buffered
             // at the host side.
@@ -50,15 +50,14 @@ impl HttpContext for AccessControl {
         // Replace the message body if it contains the text "secret".
         // Since we returned "Pause" previuously, this will return the whole body.
         if let Some(body) = self.get_http_request_body(0, body_size) {
-
-            // log::info!("body: {:?}", body);
+            // log::warn!("body: {:?}", body);
             // Parse grpc payload, skip the first 5 bytes
             match echo::Msg::decode(&body[5..]) {
                 Ok(req) => {
                     // log::info!("req: {:?}", req);
-
-                    if req.body != "test" {
-                        log::info!("body.len(): {}", Msg.body.len());
+                    // log::warn!("body.len(): {}", req.body.len());
+                    // log::warn!("body : {}", req.body);
+                    if req.body == "/test" {
                         self.send_http_response(
                             200,
                             vec![
