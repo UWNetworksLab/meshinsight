@@ -58,12 +58,12 @@ impl HttpContext for AccessControl {
                     // log::info!("req: {:?}", req);
 
                     if req.body != "test" {
-                        // block the user called 'danyang' ;-)
+                        log::info!("body.len(): {}", Msg.body.len());
                         self.send_http_response(
                             200,
                             vec![
                                 ("grpc-status", "1"),
-                                ("grpc-message", "Access forbidden.\n"),
+                                // ("grpc-message", "Access forbidden.\n"),
                             ],
                             None,
                         );

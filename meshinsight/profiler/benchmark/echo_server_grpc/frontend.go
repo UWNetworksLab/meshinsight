@@ -15,7 +15,7 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Printf("%s\n", request.URL.String())
 
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+	conn, err := grpc.Dial("echo-server:9000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
@@ -41,7 +41,7 @@ func main() {
 	http.HandleFunc("/", handler)
 
 	fmt.Printf("Starting server at port 8080\n")
-	if err := http.ListenAndServe("echo-server:8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 }
