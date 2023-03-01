@@ -17,3 +17,4 @@ require (
 )
 
 replace github.com/Romero027/grpc-go => /users/xzhu/grpc-go
+// replace github.com/Romero027/grpc-go => ./grpc-go

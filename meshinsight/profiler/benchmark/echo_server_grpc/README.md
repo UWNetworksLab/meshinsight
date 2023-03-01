@@ -14,6 +14,8 @@ To run the server as a Docker container, follow these steps:
 
 ## Push docker container
 - Change ":9000" to "echo-server:9000" in frontend.go (this is only required for Kubernetes deployments).
+- `docker build --tag echo-frontend -f Dockerfile-frontend .`
+- `docker build --tag echo-server -f Dockerfile-server  .`
 - `docker tag echo-frontend xzhu0027/echo-frontend-grpc`
 - `docker push xzhu0027/echo-frontend-grpc`
 - `docker tag echo-server xzhu0027/echo-server-grpc`

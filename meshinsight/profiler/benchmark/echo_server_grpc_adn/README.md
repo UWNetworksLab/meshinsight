@@ -2,8 +2,13 @@
 
 A simple echo server using Go and gRPC with ADN.
 
+## Run it locally
+- Make sure you git the grpc-go library `git clone https://github.com/Romero027/grpc-go.git` to the directory specified in `go.mod`
+
 ## Run as docker container 
-- Change ":9000" to "server:9000" in frontend.go （only for docker depolyments)
+- Only required for Docker deployments:
+    - Change ":9000" to "server:9000" in frontend.go 
+    - Add `replace github.com/Romero027/grpc-go => ./grpc-go` in `go.mod`
 - `docker build --tag echo-frontend-grpc-adn -f Dockerfile-frontend .`
 - `docker build --tag echo-server-grpc-adn -f Dockerfile-server .`
 - `docker network create test`
@@ -12,7 +17,11 @@ A simple echo server using Go and gRPC with ADN.
 - `curl http://localhost:8080/echo`
 
 ## Push docker container
-- Change ":9000" to "echo-server:9000" in frontend.go （only for k8s depolyments)
+- Only required for k8s depolyments
+    -  Change ":9000" to "echo-server:9000" in frontend.go 
+    - Add `replace github.com/Romero027/grpc-go => ./grpc-go` in `go.mod`
+- `docker build --tag echo-frontend-grpc-adn -f Dockerfile-frontend .`
+- `docker build --tag echo-server-grpc-adn -f Dockerfile-server .`
 - `docker tag echo-frontend-grpc-adn xzhu0027/echo-frontend-grpc-adn`
 - `docker push xzhu0027/echo-frontend-grpc-adn`
 - `docker tag echo-server-grpc-adn xzhu0027/echo-server-grpc-adn`

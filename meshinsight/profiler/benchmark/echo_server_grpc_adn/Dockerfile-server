@@ -1,9 +1,9 @@
 From golang:1.18.3
 
 WORKDIR /echoserver
+RUN git clone https://github.com/Romero027/grpc-go.git ./grpc-go
 
 COPY . ./
-
 
 RUN go mod download
 RUN go build -o /server server.go

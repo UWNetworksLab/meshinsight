@@ -19,15 +19,13 @@ spec:
   replicas: 1
   template:
     metadata:
-      annotations:
-        inject.istio.io/templates: grpc-agent
       name: echo-frontend
       labels:
         app: echo-frontend
     spec:
       containers:
-      - image: xzhu0027/echo-frontend-grpc-proxyless
-        name: echo-frontend-grpc-proxyless
+      - image: xzhu0027/echo-frontend-grpc-adn
+        name: echo-frontend-grpc-adn
   selector:
     matchLabels:
       app: echo-frontend
@@ -53,16 +51,13 @@ spec:
   replicas: 1
   template:
     metadata:
-      annotations:
-        inject.istio.io/templates: grpc-agent
-        proxy.istio.io/config: '{"holdApplicationUntilProxyStarts": true}'
       name: echo-server
       labels:
         app: echo-server
     spec:
       containers:
-      - image: xzhu0027/echo-server-grpc-proxyless
-        name: echo-server-grpc-proxyless
+      - image: xzhu0027/echo-server-grpc-adn
+        name: echo-server-grpc-adn
   selector:
     matchLabels:
       app: echo-server
