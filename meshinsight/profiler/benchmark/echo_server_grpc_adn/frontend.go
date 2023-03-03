@@ -11,40 +11,6 @@ import (
 	echo "github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc_adn/pb"
 )
 
-// func UnaryClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.ADNInvoker, opts ...grpc.CallOption) (err error) {
-// 	// start := time.Now()
-// 	// time.Sleep(1 * time.Second)
-// 	// defer func() {
-// 	// 	in, _ := json.Marshal(req)
-// 	// 	out, _ := json.Marshal(reply)
-// 	// 	inStr, outStr := string(in), string(out)
-// 	// 	duration := int64(time.Since(start).Microseconds())
-
-// 	// 	log.Printf(cc.Authority())
-// 	// 	log.Println("grpc", method, "in", inStr, "out", outStr, "err", err, "duration/us", duration)
-
-// 	// }()
-// 	log.Println("Hello from UnaryClientInterceptor")
-// 	return invoker(ctx, method, req, reply, cc, opts...)
-// }
-
-// func UnaryClientInterceptor2(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.ADNInvoker, opts ...grpc.CallOption) (err error) {
-// 	// start := time.Now()
-// 	// time.Sleep(1 * time.Second)
-// 	// defer func() {
-// 	// 	in, _ := json.Marshal(req)
-// 	// 	out, _ := json.Marshal(reply)
-// 	// 	inStr, outStr := string(in), string(out)
-// 	// 	duration := int64(time.Since(start).Microseconds())
-
-// 	// 	log.Printf(cc.Authority())
-// 	// 	log.Println("grpc", method, "in", inStr, "out", outStr, "err", err, "duration/us", duration)
-
-// 	// }()
-// 	log.Println("Hello from UnaryClientInterceptor2")
-// 	return invoker(ctx, method, req, reply, cc, opts...)
-// }
-
 func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Printf("%s\n", request.URL.String())
 
