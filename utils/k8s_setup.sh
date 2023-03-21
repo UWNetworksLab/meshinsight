@@ -60,9 +60,9 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo swapoff -a
 
 
-if [ -f "rm /etc/containerd/config.toml" ]; then
+if [ -f "/etc/containerd/config.toml" ]; then
   # Remove the file
-  rm "rm /etc/containerd/config.toml"
+  sudo rm "/etc/containerd/config.toml"
 fi
 
 ### for control plane (paste this to /etc/systemd/system/kubelet.service.d/10-kubeadm.conf) 
