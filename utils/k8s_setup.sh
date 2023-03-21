@@ -60,10 +60,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo swapoff -a
 
 
-if [ -f "/etc/containerd/config.toml" ]; then
-  # Remove the file
-  sudo rm "/etc/containerd/config.toml"
-fi
+sudo rm "/etc/containerd/config.toml"
 
 ### for control plane (paste this to /etc/systemd/system/kubelet.service.d/10-kubeadm.conf) 
 
@@ -82,6 +79,7 @@ fi
 # Then run:
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
+sudo systemctl restart containerd
 
 sudo kubeadm init --pod-network-cidr 10.244.0.0/17 # check the output and execute command to setup the cluster
 
