@@ -1,5 +1,37 @@
 #!/bin/bash
 
+# Set default value for the argument
+valid_proxy=("istio" "linkerd")
+proxy="istio"
+
+# Parse command line options
+while getopts ":p:" opt; do
+  case $opt in
+    p)
+      proxy="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+case $proxy in
+  "${valid_proxy[@]}")
+    echo "Option '$proxy' is valid"
+    ;;
+  *)
+    echo "Invalid option: $proxy"
+    echo "Valid options are: ${valid_options[*]}"
+    exit 1
+    ;;
+esac
+
 set -ex
 
 # Set up env variable
@@ -43,17 +75,29 @@ make -j $(nproc)
 sudo make install
 popd
 
-# Install Istio
-cd $MESHINSIGHT_DIR
-# Delete if installed
-if [ -d "$MESHINSIGHT_DIR/istio-1.14.1" ];
-then sudo rm -rf $MESHINSIGHT_DIR/istio-1.14.1;
+# Install Istio or Linkerd
+if [ "$1" == "istio" ]; then
+  cd $MESHINSIGHT_DIR
+  # Delete if installed
+  if [ -d "$MESHINSIGHT_DIR/istio-1.14.1" ];
+  then sudo rm -rf $MESHINSIGHT_DIR/istio-1.14.1;
+  fi
+  curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
+  cd istio-1.14.1
+  sudo cp bin/istioctl /usr/local/bin
+  istioctl x precheck
+  istioctl install --set profile=default -y
+else
+  cd $MESHINSIGHT_DIR
+  curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/install | sh
+  echo "export PATH=$PATH:~/.linkerd2/bin" > ~/.bashrc
+  source ~/.bashrc
+  linkerd version
+  linkerd check --pre
+  linkerd install --crds | kubectl apply -f -
+  linkerd install | kubectl apply -f -
+  linkerd check
 fi
-curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
-cd istio-1.14.1
-sudo cp bin/istioctl /usr/local/bin
-istioctl x precheck
-istioctl install --set profile=default -y
 
 # turn on auto-injection
 kubectl label namespace default istio-injection=enabled --overwrite
