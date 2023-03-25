@@ -1,12 +1,19 @@
 #!/bin/bash
 
+set -ex
+
 # Set default value for the argument
 valid_proxy=("istio" "linkerd")
 proxy="istio"
 
 # Parse command line options
-while getopts ":p:" opt; do
+while getopts ":hp:" opt; do
   case $opt in
+    h)
+      echo "Usage: $0 [-p proxy]"
+      echo "  -p   Proxy to use (valid options are: ${valid_proxy[*]})"
+      exit 0
+      ;;
     p)
       proxy="$OPTARG"
       ;;
@@ -21,18 +28,14 @@ while getopts ":p:" opt; do
   esac
 done
 
-case $proxy in
-  "${valid_proxy[@]}")
+if [[ " ${valid_proxy[*]} " =~ " ${proxy} " ]]; then
     echo "Option '$proxy' is valid"
-    ;;
-  *)
+else
     echo "Invalid option: $proxy"
-    echo "Valid options are: ${valid_options[*]}"
+    echo "Valid options are: ${valid_proxy[*]}"
     exit 1
-    ;;
-esac
+fi
 
-set -ex
 
 # Set up env variable
 echo "export MESHINSIGHT_DIR=$PWD" >> ~/.bashrc
@@ -76,7 +79,7 @@ sudo make install
 popd
 
 # Install Istio or Linkerd
-if [ "$1" == "istio" ]; then
+if [ "$proxy" == "istio" ]; then
   cd $MESHINSIGHT_DIR
   # Delete if installed
   if [ -d "$MESHINSIGHT_DIR/istio-1.14.1" ];
