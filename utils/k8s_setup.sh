@@ -1,7 +1,7 @@
 #!/bin/bash
 
 valid_cni=("cilium" "flannel")
-cni="null"
+cni="flannel"
 
 while getopts ":hc:" opt; do
   case $opt in
