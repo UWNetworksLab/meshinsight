@@ -50,11 +50,18 @@ sudo systemctl restart docker
 
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+# sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+# echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+# sudo apt-get update
+
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://dl.k8s.io/apt/doc/apt-key.gpg
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt-get update
+sudo apt-get update -y
+
 # sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-get install -y kubelet=1.24.4-00 kubeadm=1.24.4-00 kubectl=1.24.4-00
+# sudo apt-get install -y kubelet=1.24.4-00 kubeadm=1.24.4-00 kubectl=1.24.4-00
+sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo swapoff -a
@@ -62,21 +69,6 @@ sudo swapoff -a
 
 sudo rm "/etc/containerd/config.toml"
 
-### for control plane (paste this to /etc/systemd/system/kubelet.service.d/10-kubeadm.conf) 
-
-# Note: This dropin only works with kubeadm and kubelet v1.11+
-# [Service]
-# Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --eviction-hard=nodefs.available<0.00005%"
-# Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
-# # This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
-# EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
-# # This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
-# # the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
-# EnvironmentFile=-/etc/default/kubelet
-# ExecStart=
-# ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
-
-# Then run:
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 sudo systemctl restart containerd
@@ -90,13 +82,13 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 ### for data plane
-# kubeadm join xxx 
+# kubeadm join xxx
 
 echo "alias k='kubectl'" >> ~/.bashrc
 . ~/.bashrc
 
 # This may not work for kubernetes v1.25+
-kubectl taint nodes --all node-role.kubernetes.io/master-
+# kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 set +ex
