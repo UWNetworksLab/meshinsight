@@ -1,7 +1,6 @@
 numpy
 kubernetes
 docker
-sklearn
 scikit-learn
 pandas
 easydict
