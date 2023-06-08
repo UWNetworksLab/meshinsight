@@ -82,11 +82,11 @@ popd
 if [ "$proxy" == "istio" ]; then
   cd $MESHINSIGHT_DIR
   # Delete if installed
-  if [ -d "$MESHINSIGHT_DIR/istio-1.14.1" ];
-  then sudo rm -rf $MESHINSIGHT_DIR/istio-1.14.1;
+  if [ -d "$MESHINSIGHT_DIR/istio-1.18.0" ];
+  then sudo rm -rf $MESHINSIGHT_DIR/istio-1.18.0;
   fi
-  curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.14.1 sh -
-  cd istio-1.14.1
+  curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.18.0 sh -
+  cd istio-1.18.0
   sudo cp bin/istioctl /usr/local/bin
   istioctl x precheck
   istioctl install --set profile=default -y
