@@ -35,6 +35,14 @@ Note:
 - The ACL Wasm Filter can be customized to match different strings or patterns by modifying the `lib.rs` file.
 - You can check the wasm logs use `kubectl logs <echo-server-pod-name> -c istio-proxy  -f`. (Need to use `log.warn!`)
 
+
+## How to build and run go filter 
+- `./build_go_filter.sh`
+- `kubectl apply -f echo-server-grpc-istio-full.yaml` 
+- `kubectl apply -f wasm_acl.yaml`
+
+Note: Go filter is not runnabel yet.. See reference: https://github.com/envoyproxy/envoy/tree/main/examples/golang-http/simple
+
 ### Acknowledgement
 
 Thanks to the mRPC team for the wasm rust code.

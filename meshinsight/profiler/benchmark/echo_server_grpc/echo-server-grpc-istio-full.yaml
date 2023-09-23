@@ -186,7 +186,9 @@ spec:
         - mountPath: /var/run/secrets/tokens
           name: istio-token
         - mountPath: /etc/istio/pod
-          name: istio-podinfo
+          name: istio-podinfo                
+        - mountPath: /etc/libgolang.so
+          name: gofilter
         - mountPath: /etc/content_based_acl.wasm
           name: wasm
       initContainers:
@@ -231,6 +233,10 @@ spec:
           runAsNonRoot: false
           runAsUser: 0
       volumes:
+      - name: gofilter
+        hostPath:
+          path: /tmp/libgolang.so
+          type: File
       - name: wasm
         hostPath:
           path: /tmp/content_based_acl.wasm
