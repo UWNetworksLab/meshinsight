@@ -118,6 +118,9 @@ git clone https://github.com/wg/wrk.git
 cd wrk
 make -j $(nproc)
 
+sudo apt-get install libssl-dev
+sudo apt-get install libz-dev
+
 cd $MESHINSIGHT_DIR/meshinsight/profiler
 # Delete if installed
 if [ -d "$MESHINSIGHT_DIR/meshinsight/profiler/wrk2" ];
