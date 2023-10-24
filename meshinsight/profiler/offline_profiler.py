@@ -12,13 +12,19 @@ from pathlib import Path
 from sklearn.linear_model import LinearRegression
 from kubernetes import client, config
 import numpy as np
+from rich.logging import RichHandler
 
 from config.parser import *
 from config.config import *
 
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+)
 # Disable kubernetes python client logging
 logging.getLogger('kubernetes').setLevel(logging.FATAL)
 logging.getLogger('docker').setLevel(logging.FATAL)
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -548,7 +554,7 @@ def get_platform_info():
             shell=True, stdout=subprocess.PIPE, check=True).stdout.decode("utf-8").rstrip('\n') 
 
     # Get Kubernetes verion
-    k8s_info = re.split(":|\n", subprocess.run("kubectl version --client --short", shell=True, \
+    k8s_info = re.split(":|\n", subprocess.run("kubectl version --client", shell=True, \
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True).stdout.decode("utf-8"))[1]
 
     # Get Envoy Version 
