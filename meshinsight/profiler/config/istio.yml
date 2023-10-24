@@ -2,7 +2,7 @@
 PROTOCOLS:
   - tcp
   - http
-  - grpc
+  # - grpc
 
 REQUEST_SIZES:
   - 100
@@ -18,20 +18,20 @@ ISTIO:
         IPC: process_backlog
         READ: vfs_readv
         WRITE: vfs_writev
-        EPOLL: ep_send_events_proc
+        EPOLL: ep_send_events
         USER: :*onReadReady*    
       HTTP: 
         IPC: process_backlog
         READ: vfs_readv
         WRITE: vfs_writev
-        EPOLL: ep_send_events_proc
+        EPOLL: ep_send_events
         USER: :*onReadReady*  
         PARSE: :*http_parser_execute*
       GRPC: 
         IPC: process_backlog
         READ: vfs_readv
         WRITE: vfs_writev
-        EPOLL: ep_send_events_proc
+        EPOLL: ep_send_events
         USER: :*onReadReady*  
         PARSE: :*nghttp2_session_mem_recv*
     APP:

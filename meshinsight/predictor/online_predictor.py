@@ -5,6 +5,7 @@ import re
 import numpy as np
 import argparse
 import subprocess
+from rich.logging import RichHandler
 sys.path.append("./CRISP")
 
 from CRISP.process import *
@@ -74,7 +75,7 @@ def get_platform_info():
             shell=True, stdout=subprocess.PIPE, check=True).stdout.decode("utf-8").rstrip('\n') 
 
     # Get Kubernetes verion
-    k8s_info = re.split(":|\n", subprocess.run("kubectl version --client --short", shell=True, \
+    k8s_info = re.split(":|\n", subprocess.run("kubectl version --client", shell=True, \
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True).stdout.decode("utf-8"))[1]
 
     # Get Envoy Version 
@@ -160,11 +161,12 @@ if __name__ == '__main__':
 
     args = parse_args(MESHINSIGHT_DIR)
 
+    FORMAT = "%(message)s"
     if args.verbose:
-        logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
     else:
-        logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
-
+        logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+        
     cfg = get_config(os.path.join(MESHINSIGHT_DIR, args.config))
     
     logging.debug("Running CRISP to get the critical paths...")

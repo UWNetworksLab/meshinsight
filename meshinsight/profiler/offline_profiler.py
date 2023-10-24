@@ -17,10 +17,6 @@ from rich.logging import RichHandler
 from config.parser import *
 from config.config import *
 
-FORMAT = "%(message)s"
-logging.basicConfig(
-    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
-)
 # Disable kubernetes python client logging
 logging.getLogger('kubernetes').setLevel(logging.FATAL)
 logging.getLogger('docker').setLevel(logging.FATAL)
@@ -105,13 +101,15 @@ def run_funclatency(func, duration, pid, size=0, num_calls=0, lower_bound=0):
         cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-w '+str(lower_bound)]
     elif num_calls == 0:
         # run funclatency by return value
-        cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-t '+str(size)]
+        # cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-t '+str(size)]
+        cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration)]
     else:
         # run funclatency by number of calls when return value is not avaliable
         cmd = ['python3', cfg.PATH.FUNCLATENCY_FILTER_PATH, '-p '+str(pid), func, '-d '+str(duration), '-n '+str(num_calls)]
 
     logging.debug("Running cmd: " + " ".join(cmd))
-    result = subprocess.run(cmd, stdout=subprocess.PIPE)
+    # result = subprocess.run(cmd, stdout=subprocess.PIPE)
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     result = result.stdout.decode("utf-8").split('\n')
 
@@ -266,7 +264,6 @@ def linear_regression(label, input_data):
     y = np.array([e[1] for e in input_data])
 
     reg = LinearRegression().fit(X, y)
-    # logging.debug(label+ " reg score: %.2f", reg.score(X, y))
 
     return reg
 
@@ -274,22 +271,28 @@ def build_latency_model(profile, request_sizes, protocol):
     models = {}
 
     read_data = [(i, profile[i]["read"]) for i in request_sizes]
+    # print(read_data)
     models['read_reg'] = linear_regression("read", read_data)
 
     write_data =  [(i, profile[i]["write"]) for i in request_sizes]
+    # print(write_data)
     models['write_reg']  = linear_regression("write", write_data)
 
     epoll_data = [(i, profile[i]["epoll"]) for i in request_sizes]
+    # print(epoll_data)
     models['epoll_reg']  = linear_regression("epoll", epoll_data)
 
     ipc_data = [(i, profile[i]["ipc"]) for i in request_sizes]
+    # print(ipc_data)
     models['ipc_reg']  = linear_regression("ipc", ipc_data)
 
     envoy_data = [(i, profile[i]["others(proxy)"]) for i in request_sizes] 
+    # print(envoy_data)
     models['envoy_reg']  = linear_regression("others(proxy)", envoy_data)
 
     if protocol != "tcp":
         parsing_data = [(i, profile[i]["parsing(proxy)"]) for i in request_sizes] 
+        # print(parsing_data)
         models['parsing_reg']  = linear_regression("parsing(proxy)", parsing_data)
         
     return models
@@ -382,7 +385,6 @@ def get_target_cpu_percentage(target, xranges=None, app_syscall=False):
     sum = 0.0
     for line in lines:
         if target in line:
-            # print(line)
             if xranges:
                 # We are only interested in function that is within the xranges
                 temp = [l for l in line.split() if 'x' in l or 'width' in l]
@@ -582,14 +584,16 @@ if __name__ == '__main__':
     start = time.time()
     args = parse_args()
 
+
+    FORMAT = "%(message)s"
     if args.verbose:
-        logging.basicConfig(format='%(asctime)s | %(levelname)8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
     else:
-        logging.basicConfig(format='%(asctime)s | %(levelname)8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
 
     # Get Platform info
     platform_config = get_platform_info()
-    logging.debug("Platform info: "+str(platform_config))
+    logging.info("Platform info: "+str(platform_config))
     profile = {platform_config: {}}
     clean_up()
 
@@ -629,7 +633,6 @@ if __name__ == '__main__':
         pickle.dump(profile, fout)
     logging.info("Profile saved to %s", os.path.join(MESHINSIGHT_DIR, "meshinsight/profiles/profile.pkl"))
 
-    print(profile)
     clean_up()
     end = time.time()
-    logging.info("Profile finished, took %.2f seconds", end-start)
+    logging.info("Profile finished, took %.2f minutes", (end-start)/60)

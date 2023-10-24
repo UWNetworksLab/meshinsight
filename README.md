@@ -28,9 +28,9 @@ mesh configuration, and application workload. Optionally, MeshInsight can predic
 
 ## Step 1: Run offline profiler
 ```bash
-# Run profiler for latency and cpu overhead profile.
+# Run profiler for latency and cpu overhead profile. Root access is needed for BCC and perf
 # Once it completes, the profile will be saved to meshinsight/profiles/
-sudo python3 ./meshinsight/profiler/offline_profiler.py --latency --cpu
+sudo -E python3 ./meshinsight/profiler/offline_profiler.py --latency --cpu
 
 usage: offline_profiler.py [-h] [-v] [-c] [-l] [-d DURATION] 
 
