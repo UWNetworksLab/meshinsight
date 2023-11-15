@@ -31,6 +31,9 @@ The ACL Wasm Filter is a content-based Access Control List (ACL) implemented usi
 - `kubectl apply -f wasm_acl.yaml`
     - Add the ACL wasm filter to echo server. By default, the filter blocks requests that match a certain string.
 
+- `kubectl delete all,envoyfilters --all`
+    - Clean up
+
 Note: 
 - The ACL Wasm Filter can be customized to match different strings or patterns by modifying the `lib.rs` file.
 - You can check the wasm logs use `kubectl logs <echo-server-pod-name> -c istio-proxy  -f`. (Need to use `log.warn!`)

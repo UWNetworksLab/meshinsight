@@ -34,7 +34,7 @@ impl HttpContext for AccessControl {
     }
 
     fn on_http_request_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
-        // log::warn!("executing on_http_request_body");
+        log::warn!("executing on_http_request_body");
         if !end_of_stream {
             // Wait -- we'll be called again when the complete body is buffered
             // at the host side.
@@ -58,8 +58,49 @@ impl HttpContext for AccessControl {
                     // log::warn!("body.len(): {}", req.body.len());
                     // log::warn!("body : {}", req.body);
                     if req.body == "/test" {
+                        // Status code: https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md
+                        self.send_http_response(
+                            // 200,
+                            403, // 403 
+                            vec![
+                                ("grpc-status", "7"),
+                                // ("grpc-message", "Access forbidden.\n"),
+                            ],
+                            None,
+                        );
+                        return Action::Pause;
+                    }
+                }
+                Err(e) => log::warn!("decode error: {}", e),
+            }
+        }
+
+        Action::Continue
+    }
+
+    fn on_http_response_headers(&mut self, _num_of_headers: usize, end_of_stream: bool) -> Action {
+        log::warn!("executing on_http_response_headers");
+        Action::Continue
+    }
+
+
+    fn on_http_response_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
+        log::warn!("executing on_http_response_body");
+
+        if let Some(body) = self.get_http_response_body(0, body_size) {
+            // log::warn!("body: {:?}", body);
+            // Parse grpc payload, skip the first 5 bytes
+            match echo::Msg::decode(&body[5..]) {
+                Ok(req) => {
+                    // log::info!("req: {:?}", req);
+                    // log::warn!("body.len(): {}", req.body.len());
+                    // log::warn!("body : {}", req.body);
+                    if req.body == "/test11" {
+                        log::warn!("blocking response");
+                        // Status code: https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md
                         self.send_http_response(
                             200,
+                            // 403, // 403 
                             vec![
                                 ("grpc-status", "1"),
                                 // ("grpc-message", "Access forbidden.\n"),
@@ -75,4 +116,5 @@ impl HttpContext for AccessControl {
 
         Action::Continue
     }
+    
 }

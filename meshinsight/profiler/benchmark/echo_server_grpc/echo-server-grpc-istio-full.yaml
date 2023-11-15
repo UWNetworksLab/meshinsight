@@ -33,6 +33,7 @@ spec:
     spec:
       containers:
       - image: xzhu0027/echo-frontend-grpc
+        imagePullPolicy: Always
         name: echo-frontend-grpc
         resources: {}
 status: {}
@@ -81,6 +82,7 @@ spec:
     spec:
       containers:
       - image: xzhu0027/echo-server-grpc
+        imagePullPolicy: Always
         name: echo-server-grpc
         resources: {}
       - args:
@@ -187,8 +189,8 @@ spec:
           name: istio-token
         - mountPath: /etc/istio/pod
           name: istio-podinfo                
-        - mountPath: /etc/libgolang.so
-          name: gofilter
+        # - mountPath: /etc/libgolang.so
+        #   name: gofilter
         - mountPath: /etc/content_based_acl.wasm
           name: wasm
       initContainers:
@@ -233,10 +235,10 @@ spec:
           runAsNonRoot: false
           runAsUser: 0
       volumes:
-      - name: gofilter
-        hostPath:
-          path: /tmp/libgolang.so
-          type: File
+      # - name: gofilter
+      #   hostPath:
+      #     path: /tmp/libgolang.so
+      #     type: File
       - name: wasm
         hostPath:
           path: /tmp/content_based_acl.wasm

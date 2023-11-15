@@ -17,7 +17,12 @@ type server struct {
 
 func (s *server) Echo(ctx context.Context, x *echo.Msg) (*echo.Msg, error) {
 	log.Printf("got: [%s]", x.GetBody())
-	return x, nil
+
+	appendedBody := x.GetBody() + "1"
+	msg := &echo.Msg{
+		Body: appendedBody,
+	}
+	return msg, nil
 }
 
 func main() {
