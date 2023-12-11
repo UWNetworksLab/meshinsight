@@ -122,8 +122,5 @@ sudo rm -rf $HOME/.kube
 echo "alias k='kubectl'" >> ~/.bashrc
 . ~/.bashrc
 
-# This may not work for kubernetes v1.25+
-# kubectl taint nodes --all node-role.kubernetes.io/master-
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 set +ex
