@@ -116,7 +116,7 @@ fi
 sudo kubeadm reset -f
 sudo rm -rf $HOME/.kube
 
-### for data plane
+### for data plane (kubeadm token create --print-join-command)
 # kubeadm join xxx
 
 echo "alias k='kubectl'" >> ~/.bashrc
