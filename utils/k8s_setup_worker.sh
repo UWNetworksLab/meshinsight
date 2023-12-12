@@ -122,5 +122,8 @@ sudo rm -rf $HOME/.kube
 echo "alias k='kubectl'" >> ~/.bashrc
 . ~/.bashrc
 
+sudo apt-get update
+sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
+sudo apt-get install -y sysstat
 
 set +ex
