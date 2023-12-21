@@ -81,12 +81,12 @@ Repo Root
 # Reference
 Please consider citing our paper if you find MeshInsight related to your research.
 ```bibtex
-@misc{https://doi.org/10.48550/arxiv.2207.00592,
-  url = {https://arxiv.org/abs/2207.00592}, 
-  author = {Zhu, Xiangfeng and She, Guozhen and Xue, Bowen and Zhang, Yu and Zhang, Yongsu and Zou, Xuan Kelvin and Duan, Xiongchun and He, Peng and Krishnamurthy, Arvind and Lentz, Matthew and Zhuo, Danyang and Mahajan, Ratul},
-  title = {Dissecting Service Mesh Overheads},
-  publisher = {arXiv},
-  year = {2022}
+@inproceedings{meshinsight,
+  title={Dissecting Overheads of Service Mesh Sidecars},
+  author={Zhu, Xiangfeng and She, Guozhen and Xue, Bowen and Zhang, Yu and Zhang, Yongsu and Zou, Xuan Kelvin and Duan, XiongChun and He, Peng and Krishnamurthy, Arvind and Lentz, Matthew and others},
+  booktitle={Proceedings of the 2023 ACM Symposium on Cloud Computing},
+  pages={142--157},
+  year={2023}
 }
 ```
 
